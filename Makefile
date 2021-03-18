@@ -16,3 +16,6 @@ tmp:
 #Install a project with a clean slate
 install_ci:
 	npm ci
+
+lint:
+	npx eslint .
