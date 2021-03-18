@@ -2,7 +2,7 @@
 [![Actions Status](https://github.com/tychkovas/backend-project-lvl3/workflows/hexlet-check/badge.svg)](https://github.com/tychkovas/backend-project-lvl3/actions)
 
 ### State:
-[![Maintainability](https://api.codeclimate.com/v1/badges/90514effad227fe7da1e/maintainability)](https://codeclimate.com/github/tychkovas/backend-project-lvl3/maintainability) [![Test Coverage](https://api.codeclimate.com/v1/badges/90514effad227fe7da1e/test_coverage)](https://codeclimate.com/github/tychkovas/backend-project-lvl3/test_coverage)
+[![Maintainability](https://api.codeclimate.com/v1/badges/90514effad227fe7da1e/maintainability)](https://codeclimate.com/github/tychkovas/backend-project-lvl3/maintainability) [![Test Coverage](https://api.codeclimate.com/v1/badges/90514effad227fe7da1e/test_coverage)](https://codeclimate.com/github/tychkovas/backend-project-lvl3/test_coverage) [![CI](https://github.com/tychkovas/backend-project-lvl3/actions/workflows/nodejs.yml/badge.svg)](https://github.com/tychkovas/backend-project-lvl3/actions/workflows/nodejs.yml)
 # Page Loader
 ### Сохрани страницу
 
