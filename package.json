@@ -6,6 +6,7 @@
   "bin": {
     "page-loader": "bin/page-loader.js"
   },
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
