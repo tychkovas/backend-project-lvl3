@@ -1,3 +1,6 @@
+/**
+ * @jest-environment node
+ */
 import nock from 'nock';
 import fsp from 'fs/promises';
 // import path from 'path';
@@ -17,7 +20,7 @@ let expectedPage;
 let tempDir;
 
 beforeAll(async () => {
-  expectedPage = await fsp.readFile(getFixturesPath('ru_local_io_courses.html'), 'UTF-8');
+  expectedPage = await fsp.readFile(getFixturesPath('local_test_file.html'), 'UTF-8');
 });
 
 beforeEach(async () => {
