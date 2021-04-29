@@ -14,7 +14,7 @@ program
   .option('-o, --output [path]', 'Specify the path to the directory for the saved page', process.cwd())
   .arguments('<pageAddress>')
   .action(async (pageAddress, options) => {
-    //console.log('current directory =', process.cwd());
+    // console.log('current directory =', process.cwd());
     const pathToLoadFile = await pageLoad(pageAddress, options.output);
     console.log(pathToLoadFile);
   });
