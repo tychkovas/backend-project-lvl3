@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 
 import commander from 'commander';
-import pageLoad from '../index.js';
+import pageLoad from '../src/index.js';
 
 const { program } = commander;
 
-console.log('Welcome, this is page loader!');
+// console.log('Welcome, this is page loader!');
 
 program
   .version('1.0.0', '-v, --vers', 'Output the current version')
@@ -13,10 +13,10 @@ program
   .helpOption('-h, --help', 'Output usage information')
   .option('-o, --output [path]', 'Specify the path to the directory for the saved page', process.cwd())
   .arguments('<pageAddress>')
-  .action((pageAddress, options) => {
-    console.log('current directory =', process.cwd());
-    const pathToLoadFile = pageLoad(pageAddress, options.output);
-    console.log('\n', pathToLoadFile);
+  .action(async (pageAddress, options) => {
+    //console.log('current directory =', process.cwd());
+    const pathToLoadFile = await pageLoad(pageAddress, options.output);
+    console.log(pathToLoadFile);
   });
 
 program.parse(process.argv);
