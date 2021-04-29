@@ -14,17 +14,17 @@ PATH_OUTPUT := .\var\tmp
 
 run_win:
 	@echo "Start load page test. The folder $(PATH_OUTPUT) must exists."
-	node src/bin/page-loader.js --output $(PATH_OUTPUT) https://ru.hexlet.io/courses
+	node bin/page-loader.js --output $(PATH_OUTPUT) https://ru.hexlet.io/courses
 
 run_win_ls:
 	@echo "Start load page test. The folder $(PATH_OUTPUT) must exists."
 	ls -a $(PATH_OUTPUT)
-	node src/bin/page-loader.js --output $(PATH_OUTPUT) https://ru.hexlet.io/courses
+	node bin/page-loader.js --output $(PATH_OUTPUT) https://ru.hexlet.io/courses
 	ls -a $(PATH_OUTPUT)
 
 run_linux:
 	@echo "Start load page test"
-	node src/bin/page-loader.js --output /var/tmp https://ru.hexlet.io/courses
+	node bin/page-loader.js --output /var/tmp https://ru.hexlet.io/courses
 
 lint:
 	npx eslint .
