@@ -7,3 +7,15 @@
 ### Сохрани страницу
 
 Утилита командной строки, которая скачивает страницы из интернета и сохраняет их на компьютере. Вместе со страницей она скачивает все ресурсы (картинки, стили и js) давая возможность открывать страницу без интернета
+
+## Install
+
+```sh
+$ git clone https://github.com/tychkovas/backend-project-lvl3
+$ cd backend-project-lvl3
+$ make install
+$ sudo npm link
+```
+
+## Example 
+[![asciicast](https://asciinema.org/a/WC7tTEDGzMRXwZMgvcorfEWVU.svg)](https://asciinema.org/a/WC7tTEDGzMRXwZMgvcorfEWVU)
