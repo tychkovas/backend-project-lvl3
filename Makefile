@@ -12,6 +12,9 @@ PATH_OUTPUT := .\var\tmp
 #for linux
 #PATH_OUTPUT = /var/tmp
 
+clean:
+	rm -Rf var/tmp/*
+
 run_win:
 	@echo "Start load page test. The folder $(PATH_OUTPUT) must exists."
 	node bin/page-loader.js --output $(PATH_OUTPUT) https://ru.hexlet.io/courses
@@ -30,6 +33,6 @@ lint:
 	npx eslint .
 
 publish:
-	npm publish
+	npm publish --dry-run
 
 .PHONY: test

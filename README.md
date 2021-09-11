@@ -18,4 +18,8 @@ $ sudo npm link
 ```
 
 ## Example 
+#### demonstrates HTML html file
 [![asciicast](https://asciinema.org/a/WC7tTEDGzMRXwZMgvcorfEWVU.svg)](https://asciinema.org/a/WC7tTEDGzMRXwZMgvcorfEWVU)
+
+#### demonstrates the structure of files
+[![asciicast](https://asciinema.org/a/5Mz6ApchGieaH2Y8M8EwUDgeI.svg)](https://asciinema.org/a/5Mz6ApchGieaH2Y8M8EwUDgeI)
