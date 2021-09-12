@@ -8,10 +8,12 @@
   },
   "type": "module",
   "jest": {
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "transform": {}
   },
   "scripts": {
-    "test": "npx jest"
+    "test": "npx jest",
+    "run": "node bin/page-loader.js --output /var/tmp https://ru.hexlet.io/courses"
   },
   "repository": {
     "type": "git",
@@ -39,6 +41,7 @@
   },
   "dependencies": {
     "axios": "^0.21.1",
+    "cheerio": "^1.0.0-rc.10",
     "commander": "^7.2.0",
     "lodash": "^4.17.21"
   }
