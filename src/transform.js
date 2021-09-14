@@ -1,24 +1,43 @@
 #!/usr/bin/env node
+/* eslint-disable function-paren-newline */
 import * as cheerio from 'cheerio';
 // import { combineFlagAndOptionalValue } from 'commander';
 import path, { join } from 'path';
 import clog from '../utils.js';
 
-const getNameLoadFile = (link) => {
- return 'tmp';
-};
+const getNameFile = (url, separator) => url
+  .replace(/^\w*?:\/\//mi, '') // ^https?:\/\/
+  .replace(/\W/mig, separator);
 
-const getPageForSave = (data, pathLoadFile, url) => {
+// const getNameFile2 = (url, separator) => url.replace(/^\w*?:\/\//mi, '').match(/^[^\/]+/mi);
+const getPrefixFile = (url, separator) => url
+  .match(/([a-zA-Z]+(\.[a-zA-Z]+)+)/i)[0]
+  .replace(/\./ig, separator);
+
+const getNameLoadFile = (prefix, link) => `${prefix}${link.replace(/\//mig, '-')}`;
+
+// https: //ru.hexlet.io/courses
+// "/assets/professions/nodejs.png"
+// "ru-hexlet-io-courses_files/ru-hexlet-io-assets-professions-nodejs.png"
+
+const getPageForSave = (data, pathSaveDir, url) => {
   clog('data:', data);
-  clog('pathLoadFile:', pathLoadFile);
-  clog('url:', url);
+  clog('pathSaveDir:', pathSaveDir);
+  clog('url:', url, '\n');
+
+  const pathSave = getNameFile(url, '-').concat('_files');
+  console.log('pathSave: ', pathSave);
+
+  const prefixFile = getPrefixFile(url, '-');
+  console.log('prefixFile: ', prefixFile);
+
+  clog('');
   const $ = cheerio.load(data, null, false);
-  const img = $('img');
-  //console.log(' img ==', img);
+  const img = $('img'); // console.log(' img ==', img);
   img.each((i, el) => {
     const link = $(el).attr('src');
     console.log(' link ==', link);
-    const newLink = `${path.join(pathLoadFile, getNameLoadFile(link))}`;
+    const newLink = `${path.join(pathSave, getNameLoadFile(prefixFile, link))}`;
     // $el.attr('src', 'new val');
     console.log(' link ==', newLink);
   });

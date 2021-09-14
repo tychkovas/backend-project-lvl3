@@ -17,14 +17,17 @@ const pageLoad = (pageAddress, outputPath) => {
   const pathSaveFile = path.join(outputPath, nameSaveFile);
   console.log('outputPath: ', outputPath);
   console.log(' - pathSaveFile = ', pathSaveFile);
-  const pathSaveDir = join(outputPath, getNameDir(nameSaveFile));
-  console.log('pathSaveDir: ', pathSaveDir);
+  const pathSave = getNameDir(nameSaveFile);
+  console.log('pathSave: ', pathSave);
+  //const pathSaveDir = join(outputPath, getNameDir(nameSaveFile));
+  //console.log('pathSaveDir: ', pathSaveDir);
 
   const result = axios.get(pageAddress)
     .then((response) => response.data)
-    .catch((err) => console.log('\n error axios get: err.response.status =', err.response.status))
+    .catch((err) => console.log('\n error axios get: err.response.status =',
+      err.response.status))
     // .then((data) => get)
-    .then((data) => fsp.writeFile(pathSaveFile, getPageForSave(data, pathSaveFile, pageAddress)))
+    .then((data) => fsp.writeFile(pathSaveFile, getPageForSave(data, pathSave, pageAddress)))
     .then(() => fsp.mkdir(pathSaveDir))
     // .then(() => pathSaveFile)
     .catch((error) => console.log('\n error write file =', error));
