@@ -21,7 +21,7 @@ const getNameLoadFile = (prefix, link) => `${prefix}${link.replace(/\//mig, '-')
 // "ru-hexlet-io-courses_files/ru-hexlet-io-assets-professions-nodejs.png"
 
 const getPageForSave = (data, pathSaveDir, url) => {
-  clog('data:', data);
+  clog('data   :', data);
   clog('pathSaveDir:', pathSaveDir);
   clog('url:', url, '\n');
 
@@ -32,18 +32,31 @@ const getPageForSave = (data, pathSaveDir, url) => {
   console.log('prefixFile: ', prefixFile);
 
   clog('');
-  const $ = cheerio.load(data, null, false);
+
+  const optins = {
+    withDomLvl1: true,
+    normalizeWhitespace: false,
+    xmlMode: false,
+    decodeEntities: true,
+  };
+  const $ = cheerio.load(data, optins, true);
+
+  clog('load $ :', $.html());
+
   const img = $('img'); // console.log(' img ==', img);
   img.each((i, el) => {
     const link = $(el).attr('src');
-    console.log(' link ==', link);
+    console.log(' link  ==', link);
     const newLink = `${path.join(pathSave, getNameLoadFile(prefixFile, link))}`;
-    // $el.attr('src', 'new val');
-    console.log(' link ==', newLink);
+    console.log(' link  ==', newLink);
+    $(el).attr('src', newLink);
+    const link2 = $(el).attr('src');
+    console.log(' link2 ==', link2);
   });
   // // console.log(' $ = ', $('img').text());
   // console.log(' $ = ', $('img').attr('src'));
-  return data;
+  // return $.root().html();
+  return $.html();
 };
 
 export default getPageForSave;
