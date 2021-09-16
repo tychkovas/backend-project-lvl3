@@ -3,9 +3,10 @@
  * @jest-environment node
  */
 import fsp from 'fs/promises';
-import os from 'os';
+// import os from 'os';
 import { fileURLToPath } from 'url';
 import { join, dirname } from 'path';
+import cheerio from 'cheerio';
 import getPageForSave from '../src/transform';
 
 const debug = 'ON';
@@ -14,9 +15,9 @@ const clog = (...par) => {
 };
 
 const __filename = fileURLToPath(import.meta.url);
-//clog('__filename:', __filename);
+// clog('__filename:', __filename);
 const __dirname = dirname(__filename);
-//clog('__dirname:', __dirname);
+// clog('__dirname:', __dirname);
 const getFixturesPath = (filename) => join(__dirname, '..', '__fixtures__', filename);
 clog('getFixturesPath:', getFixturesPath('name.tmp'));
 
@@ -42,8 +43,16 @@ test('transform page', async () => {
   const resultTranform = getPageForSave(expectedPage, pathActualFile, url);
 
   clog('resultTranform: \n', resultTranform);
-  // expect(actualFile).toBe(resultPage);
-  expect(expectedPage).toBe(expectedPage);
+  const $ = cheerio.load(resultPage);
+
+  const resultPageFormated = $.html();
+
+  clog('rPFormated   :', resultPageFormated);
+  clog('expectedPage :', resultTranform);
+
+  expect(resultTranform).toBe(resultPageFormated);
+
+  // expect(expectedPage).toBe(expectedPage);
 });
 
 afterEach(async () => {

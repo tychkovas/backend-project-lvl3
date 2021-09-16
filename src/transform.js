@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /* eslint-disable function-paren-newline */
-import * as cheerio from 'cheerio';
+// import * as cheerio from 'cheerio';
+import cheerio from 'cheerio';
 // import { combineFlagAndOptionalValue } from 'commander';
 import path, { join } from 'path';
 import clog from '../utils.js';
@@ -21,9 +22,9 @@ const getNameLoadFile = (prefix, link) => `${prefix}${link.replace(/\//mig, '-')
 // "ru-hexlet-io-courses_files/ru-hexlet-io-assets-professions-nodejs.png"
 
 const getPageForSave = (data, pathSaveDir, url) => {
-  clog('data   :', data);
-  clog('pathSaveDir:', pathSaveDir);
-  clog('url:', url, '\n');
+  // clog('data   :', data);
+  // clog('pathSaveDir:', pathSaveDir);
+  // clog('url:', url, '\n');
 
   const pathSave = getNameFile(url, '-').concat('_files');
   console.log('pathSave: ', pathSave);
@@ -31,27 +32,28 @@ const getPageForSave = (data, pathSaveDir, url) => {
   const prefixFile = getPrefixFile(url, '-');
   console.log('prefixFile: ', prefixFile);
 
-  clog('');
+  // clog('');
 
   const optins = {
     withDomLvl1: true,
     normalizeWhitespace: false,
     xmlMode: false,
-    decodeEntities: true,
+    decodeEntities: false,
   };
   const $ = cheerio.load(data, optins, true);
+  // const $ = cheerio.load(data);
 
-  clog('load $ :', $.html());
+  //  clog('load $ :', $.html({ decodeEntities: false }));
 
   const img = $('img'); // console.log(' img ==', img);
   img.each((i, el) => {
     const link = $(el).attr('src');
-    console.log(' link  ==', link);
+    //   console.log(' link  ==', link);
     const newLink = `${path.join(pathSave, getNameLoadFile(prefixFile, link))}`;
-    console.log(' link  ==', newLink);
+    //  console.log(' link  ==', newLink);
     $(el).attr('src', newLink);
     const link2 = $(el).attr('src');
-    console.log(' link2 ==', link2);
+    // console.log(' link2 ==', link2);
   });
   // // console.log(' $ = ', $('img').text());
   // console.log(' $ = ', $('img').attr('src'));
@@ -60,6 +62,8 @@ const getPageForSave = (data, pathSaveDir, url) => {
 };
 
 export default getPageForSave;
+
+/*
 
 const result = getPageForSave(
   // eslint-disable-next-line no-multi-str
@@ -80,3 +84,5 @@ const result = getPageForSave(
   'https://ru.hexlet.io/courses');
 
 console.log('\n\nresult =', result);
+
+*/
