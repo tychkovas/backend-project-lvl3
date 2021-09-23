@@ -2,6 +2,8 @@
 /**
  * @jest-environment node
  */
+// import debug as debug1 from 'debug';
+
 import nock from 'nock';
 import fsp from 'fs/promises';
 import os from 'os';
@@ -37,18 +39,27 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
-  tempDir = await fsp.mkdtemp(join(os.tmpdir(), 'page-loader-'));
+  // tempDir = await fsp.mkdtemp(join(os.tmpdir(), 'page-loader-'));
+  tempDir = '/tmp/page-loader';
   clog('tempDir: ', tempDir);
-  // console.log('tempDir: ', tempDir);
+  console.log('tempDir: ', tempDir);
 });
 
 test('download page', async () => {
-  nock('https://ru.hexlet.io')
+  console.log('tempDir: ', tempDir);
+  const scope = nock('https://ru.hexlet.io')
+    // .log(debug1)
     .get('/courses')
     .reply(200, expectedPage);
 
+  nock('https://ru.hexlet.io')
+    .get('/courses/assets/professions/nodejs.png')
+    .replyWithFile(200, getFixturesPath('getted_page/files/local_img_nodejs.png'))
+    .get('/assets/professions/nodejs2.png')
+    .reply(200, expectedImg);
+
   const url = 'https://ru.hexlet.io/courses';
-  //await pageLoad(url, tempDir);
+  await pageLoad(url, tempDir);
 
   const pathActualFile = join(tempDir, 'ru_hexlet_io_courses.html');
   // const actualFile = await fsp.readFile(pathActualFile, 'UTF-8');
