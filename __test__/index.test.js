@@ -3,10 +3,12 @@
  * @jest-environment node
  */
 // import debug as debug1 from 'debug';
-
+// import jest from 'jest';
 import nock from 'nock';
 import fsp from 'fs/promises';
+import fs from 'fs';
 import os from 'os';
+import cheerio from 'cheerio';
 import { fileURLToPath } from 'url';
 import { join, dirname } from 'path';
 import pageLoad from '../src/index';
@@ -39,41 +41,42 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
-  // tempDir = await fsp.mkdtemp(join(os.tmpdir(), 'page-loader-'));
-  tempDir = '/tmp/page-loader';
+  tempDir = await fsp.mkdtemp(join(os.tmpdir(), 'page-loader-'));
+  // tempDir = '/tmp/page-loader';
+  // fs.mkdirSync('/tmp/page-loader');
   clog('tempDir: ', tempDir);
-  console.log('tempDir: ', tempDir);
 });
 
 test('download page', async () => {
   console.log('tempDir: ', tempDir);
-  const scope = nock('https://ru.hexlet.io')
+  nock('https://ru.hexlet.io')
     // .log(debug1)
     .get('/courses')
     .reply(200, expectedPage);
 
   nock('https://ru.hexlet.io')
-    .get('/courses/assets/professions/nodejs.png')
-    .replyWithFile(200, getFixturesPath('getted_page/files/local_img_nodejs.png'))
-    .get('/assets/professions/nodejs2.png')
+    .get('/assets/professions/nodejs.png')
     .reply(200, expectedImg);
 
   const url = 'https://ru.hexlet.io/courses';
   await pageLoad(url, tempDir);
 
   const pathActualFile = join(tempDir, 'ru_hexlet_io_courses.html');
-  // const actualFile = await fsp.readFile(pathActualFile, 'UTF-8');
-  // clog('actualFile:', actualFile);
-  // expect(actualFile).toBe(resultPage);
+  const actualFile = await fsp.readFile(pathActualFile, 'UTF-8');
+
+  const resultPageFormated = cheerio.load(resultPage).html();
+  clog('rPFormated   :', resultPageFormated);
+
+  expect(actualFile).toBe(resultPageFormated);
   expect(expectedPage).toBe(expectedPage);
 
   const pathActualImg = join(tempDir, 'ru-hexlet-io-courses_files/ru-hexlet-io-assets-professions-nodejs.png');
-  // const actualImg = await fsp.readFile(pathActualImg);
-  // expect(actualImg).toBe(expectedImg);
+  const actualImg = await fsp.readFile(pathActualImg);
+  expect(actualImg).toEqual(expectedImg);
 });
 
 afterEach(async () => {
-  // fsp.rm(tempDir, { recursive: true });
+  fsp.rm(tempDir, { recursive: true });
 });
 
 // test('get page', async () => {
