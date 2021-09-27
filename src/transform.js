@@ -22,7 +22,8 @@ const getPageForSave = (data, pathSave, url) => {
 
   img.each((i, el) => {
     const link = $(el).attr('src');
-    links.push(path.join(url, link));
+    const { href } = new URL(link, url);
+    links.push(href);
 
     const newLink = path.join(pathSave, getNameLoadFile(prefixFile, link));
     $(el).attr('src', newLink);

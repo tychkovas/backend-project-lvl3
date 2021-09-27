@@ -31,7 +31,7 @@ test('transform page', async () => {
 
   const { html: resultTranform, links } = getPageForSave(expectedPage, pathSave, url);
 
-  expect(...links).toStrictEqual('https:/ru.hexlet.io/courses/assets/professions/nodejs.png');
+  expect(...links).toStrictEqual('https://ru.hexlet.io/courses/assets/professions/nodejs.png');
 
   const resultPageFormated = cheerio.load(resultPage).html();
   clog('rPFormated   :', resultPageFormated);
