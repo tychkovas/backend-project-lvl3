@@ -15,7 +15,7 @@ const getNameLoadFile = (prefix, link) => `${prefix}${link.replace(/\//mig, '-')
 
 const getPageForSave = (data, pathSave, url) => {
   const prefixFile = getPrefixFile(url, '-');
-  const links = [];
+  const dataLinks = [];
 
   const $ = cheerio.load(data);
   const img = $('img');
@@ -23,14 +23,15 @@ const getPageForSave = (data, pathSave, url) => {
   img.each((i, el) => {
     const link = $(el).attr('src');
     const { href } = new URL(link, url);
-    links.push(href);
 
     const newLink = path.join(pathSave, getNameLoadFile(prefixFile, link));
+    dataLinks.push({ href, path: newLink });
+
     $(el).attr('src', newLink);
   });
   return {
     html: $.html(),
-    links,
+    dataLinks,
   };
 };
 

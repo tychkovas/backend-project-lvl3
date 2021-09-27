@@ -29,9 +29,12 @@ test('transform page', async () => {
   const url = 'https://ru.hexlet.io/courses';
   const pathSave = 'ru-hexlet-io-courses_files';
 
-  const { html: resultTranform, links } = getPageForSave(expectedPage, pathSave, url);
+  const { html: resultTranform, dataLinks } = getPageForSave(expectedPage, pathSave, url);
+  const { href: link, path: pathFile } = dataLinks[0];
 
-  expect(...links).toStrictEqual('https://ru.hexlet.io/assets/professions/nodejs.png');
+  expect(pathFile).toStrictEqual('ru-hexlet-io-courses_files/ru-hexlet-io-assets-professions-nodejs.png');
+
+  expect(link).toStrictEqual('https://ru.hexlet.io/assets/professions/nodejs.png');
 
   const resultPageFormated = cheerio.load(resultPage).html();
   clog('rPFormated   :', resultPageFormated);
