@@ -48,7 +48,6 @@ beforeEach(async () => {
 });
 
 test('download page', async () => {
-  console.log('tempDir: ', tempDir);
   nock('https://ru.hexlet.io')
     // .log(debug1)
     .get('/courses')
@@ -77,6 +76,7 @@ test('download page', async () => {
 
 afterEach(async () => {
   fsp.rm(tempDir, { recursive: true });
+  clog('tempDir: ', tempDir);
 });
 
 // test('get page', async () => {

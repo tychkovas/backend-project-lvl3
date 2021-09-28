@@ -8,7 +8,7 @@ import { join, dirname } from 'path';
 import cheerio from 'cheerio';
 import getPageForSave from '../src/transform';
 
-const debug = 'ON';
+const debug = 'ON_';
 const clog = (...par) => {
   if (debug === 'ON') console.log(...par);
 };
