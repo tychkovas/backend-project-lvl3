@@ -49,7 +49,7 @@ const pageLoad = (pageAddress, outputPath) => {
     .then((dataLinks) => Promise.all(dataLinks.map((item) => loadFiles(item, outputPath))))
     .catch((error) => console.log('\n error Promise all =', error));
 
-  return result;
+  return pathSaveFile;
 };
 
 export default pageLoad;
