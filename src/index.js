@@ -11,6 +11,25 @@ const getNameFile = (url, separator = '') => url.replace(/^\w*?:\/\//mi, '') // 
 
 const getNameDir = (nameFile) => path.parse(nameFile).name.concat('_files');
 
+const loadFiles = ({ href, path: pathSave }, _outputPath) => {
+  console.log('href, path: ', href, pathSave);
+
+  return axios({
+    method: 'get',
+    url: href,
+    responseType: 'stream', // 'arraybuffer', fs.promises.writeFile(itemPath, response.data, 'utf-8');
+  })
+    .catch((error) => console.log('\n error axios =', error))
+    .then((response) => {
+      console.log('response.status', response.status); // код ответа
+      // console.log("response.headers", response.headers); // напечатает заголовки
+      // console.log("response.data", response.data); // тело ответа
+      response.data.pipe(fs.createWriteStream(path.join(_outputPath, pathSave)));
+    // fsp.writeFile(path.join(outputPath, linksImg[0].path), response.data, 'binary');
+    })
+    .catch((error) => console.log('\n error write file =', error));
+};
+
 const pageLoad = (pageAddress, outputPath) => {
   const nameSaveFile = getNameFile(pageAddress, '_');
   console.log('nameSaveFile: ', nameSaveFile);
@@ -29,32 +48,18 @@ const pageLoad = (pageAddress, outputPath) => {
       err.response.status))
     // .then((data) => get)
     .then((data) => {
-      console.log('data: ', data);
+      // console.log('data: ', data);
       const { html: page, dataLinks } = getPageForSave(data, pathSave, pageAddress);
       // console.log('page: ', page);
       console.log('dataLinks: ', dataLinks);
       linksImg = dataLinks;
-      return fsp.writeFile(pathSaveFile, page, 'utf-8');
+      fsp.writeFile(pathSaveFile, page, 'utf-8');
+      return dataLinks;
     })
-    .then(() => axios({
-      method: 'get',
-      url: linksImg[0].href,
-      responseType: 'stream', // 'arraybuffer', fs.promises.writeFile(itemPath, response.data, 'utf-8');
-    }))
-    .catch((error) => console.log('\n error axios =', error))
-    .then((response) => {
-      fsp.mkdir(path.join(outputPath, pathSave));
-      return response;
-    })
+    .then(() => fsp.mkdir(path.join(outputPath, pathSave)))
     .catch((error) => console.log('\n error mkdir =', error))
-    .then((response) => {
-      console.log('response.status', response.status); // код ответа
-      // console.log("response.headers", response.headers); // напечатает заголовки
-      // console.log("response.data", response.data); // тело ответа
-      response.data.pipe(fs.createWriteStream(path.join(outputPath, linksImg[0].path)));
-      // fsp.writeFile(path.join(outputPath, linksImg[0].path), response.data, 'binary');
-    })
-    .catch((error) => console.log('\n error write file =', error));
+    .then(() => Promise.all(linksImg.map((item) => loadFiles(item, outputPath))))
+    .catch((error) => console.log('\n error Promise all =', error));
 
   return result;
 };
