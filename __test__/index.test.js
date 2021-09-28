@@ -48,7 +48,6 @@ beforeEach(async () => {
 });
 
 test('download page', async () => {
-  console.log('tempDir: ', tempDir);
   nock('https://ru.hexlet.io')
     // .log(debug1)
     .get('/courses')
@@ -77,17 +76,5 @@ test('download page', async () => {
 
 afterEach(async () => {
   fsp.rm(tempDir, { recursive: true });
+  clog('tempDir: ', tempDir);
 });
-
-// test('get page', async () => {
-//   nock('https://ru.hexlet.io')
-//     .get('/courses')
-//     .reply(200, expectedPage);
-
-//   const url = 'https://ru.hexlet.io/courses';
-//   await pageLoad(url, tempDir);
-
-//   const pathActualFile = join(tempDir, 'ru_hexlet_io_courses.html');
-//   const actualFile = await fsp.readFile(pathActualFile, 'UTF-8');
-//   expect(actualFile).toBe(expectedPage);
-// });
