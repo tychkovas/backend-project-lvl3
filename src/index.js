@@ -29,7 +29,7 @@ const pageLoad = (pageAddress, outputPath) => {
   const pathSave = getNameDir(getNameFile(pageAddress, '-'));
   const pathSaveDir = join(outputPath, pathSave);
 
-  axios.get(pageAddress)
+  return axios.get(pageAddress)
     .then((response) => response.data)
     .catch((err) => console.log('\n error axios get: err.response.status =',
       err.response.status))
@@ -47,9 +47,8 @@ const pageLoad = (pageAddress, outputPath) => {
     })
     .catch((error) => console.log('\n error mkdir =', error))
     .then((dataLinks) => Promise.all(dataLinks.map((item) => loadFiles(item, outputPath))))
-    .catch((error) => console.log('\n error Promise all =', error));
-
-  return pathSaveFile;
+    .catch((error) => console.log('\n error Promise all =', error))
+    .then(() => pathSaveFile);
 };
 
 export default pageLoad;
