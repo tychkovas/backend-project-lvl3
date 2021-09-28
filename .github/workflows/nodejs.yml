@@ -30,6 +30,7 @@ jobs:
         run: |
           make install
           make lint
+          make test
 
       # Runs a single command using the runners shell
       - name: Run a one-line script
