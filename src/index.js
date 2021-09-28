@@ -6,6 +6,7 @@ import fs, { promises as fsp } from 'fs';
 import getPageForSave from './transform.js';
 
 const getNameFile = (url, separator = '') => url.replace(/^\w*?:\/\//mi, '') // ^https?:\/\/
+  .replace(/\/$/, '')
   .replace(/\W/mig, separator)
   .concat('.html');
 
@@ -54,6 +55,7 @@ const pageLoad = (pageAddress, outputPath) => {
       fsp.writeFile(pathSaveFile, page, 'utf-8');
       return dataLinks;
     })
+    .catch((error) => console.log('\n error writeFile =', error))
     .then((dataLinks) => {
       if (dataLinks.length > 0) {
         fsp.mkdir(path.join(outputPath, pathSave));
