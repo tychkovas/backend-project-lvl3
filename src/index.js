@@ -40,8 +40,7 @@ const pageLoad = (pageAddress, outputPath) => {
   console.log('pathSave: ', pathSave);
   const pathSaveDir = join(outputPath, getNameDir(nameSaveFile));
   console.log('pathSaveDir: ', pathSaveDir);
-  let linksImg;
-
+ 
   const result = axios.get(pageAddress)
     .then((response) => response.data)
     .catch((err) => console.log('\n error axios get: err.response.status =',
@@ -52,13 +51,17 @@ const pageLoad = (pageAddress, outputPath) => {
       const { html: page, dataLinks } = getPageForSave(data, pathSave, pageAddress);
       // console.log('page: ', page);
       console.log('dataLinks: ', dataLinks);
-      linksImg = dataLinks;
       fsp.writeFile(pathSaveFile, page, 'utf-8');
       return dataLinks;
     })
-    .then(() => fsp.mkdir(path.join(outputPath, pathSave)))
+    .then((dataLinks) => {
+      if (dataLinks.length > 0) {
+        fsp.mkdir(path.join(outputPath, pathSave));
+      }
+      return dataLinks;
+    })
     .catch((error) => console.log('\n error mkdir =', error))
-    .then(() => Promise.all(linksImg.map((item) => loadFiles(item, outputPath))))
+    .then((dataLinks) => Promise.all(dataLinks.map((item) => loadFiles(item, outputPath))))
     .catch((error) => console.log('\n error Promise all =', error));
 
   return result;
