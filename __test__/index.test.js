@@ -6,7 +6,7 @@
 // import jest from 'jest';
 import nock from 'nock';
 import fsp from 'fs/promises';
-import fs from 'fs';
+// import fs from 'fs';
 import os from 'os';
 import cheerio from 'cheerio';
 import { fileURLToPath } from 'url';
@@ -20,12 +20,12 @@ const clog = (...par) => {
 };
 
 const __filename = fileURLToPath(import.meta.url);
-// clog('__filename:', __filename);
+clog('__filename:', __filename);
 const __dirname = dirname(__filename);
-// clog('__dirname:', __dirname);
+clog('__dirname:', __dirname);
 
 const getFixturesPath = (filename) => join(__dirname, '..', '__fixtures__', filename);
-// clog('getFixturesPath:', getFixturesPath('name.tmp'));
+clog('getFixturesPath:', getFixturesPath('name.tmp'));
 
 nock.disableNetConnect();
 

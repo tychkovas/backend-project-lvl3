@@ -29,7 +29,7 @@ const pageLoad = (pageAddress, outputPath) => {
   const pathSave = getNameDir(getNameFile(pageAddress, '-'));
   const pathSaveDir = join(outputPath, pathSave);
 
-  const result = axios.get(pageAddress)
+  axios.get(pageAddress)
     .then((response) => response.data)
     .catch((err) => console.log('\n error axios get: err.response.status =',
       err.response.status))
