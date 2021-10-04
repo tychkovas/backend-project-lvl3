@@ -3,7 +3,7 @@ import path, { join } from 'path';
 import axios from 'axios';
 import fs, { promises as fsp } from 'fs';
 
-import getPageForSave from './transform.js';
+import getPageForSave from './parsing.js';
 
 const getNameFile = (url, separator = '') => url.replace(/^\w*?:\/\//mi, '')
   .replace(/\/$/, '')
@@ -17,7 +17,8 @@ const loadFiles = ({ href, path: pathSave }, _outputPath) => axios({
   url: href,
   responseType: 'stream',
 })
-  .catch((error) => console.log('\n error axios =', error))
+  .catch((error) => console.log('\n error axios get status',
+    error.response.status, ', url =', error.config.url))
   .then((response) => {
     response.data.pipe(fs.createWriteStream(path.join(_outputPath, pathSave)));
   })
@@ -29,12 +30,19 @@ const pageLoad = (pageAddress, outputPath) => {
   const pathSave = getNameDir(getNameFile(pageAddress, '-'));
   const pathSaveDir = join(outputPath, pathSave);
 
+  const checkOrCreateOutputPath = (response) => fsp
+    .access(outputPath, fs.constants.F_OK)
+    .catch(() => fsp.mkdir(outputPath, { recursive: true }))
+    .then(() => response);
+
   return axios.get(pageAddress)
-    .then((response) => response.data)
     .catch((err) => console.log('\n error axios get: err.response.status =',
       err.response.status))
+    .then(checkOrCreateOutputPath)
+    .catch(() => console.error('cannot access output path', outputPath))
+    .then((response) => response.data)
     .then((data) => {
-      const { html, dataLinks } = getPageForSave(data, pathSave, pageAddress);
+      const { html, assets: dataLinks } = getPageForSave(data, pathSave, pageAddress);
       fsp.writeFile(pathSaveFile, html, 'utf-8');
       return dataLinks;
     })
