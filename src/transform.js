@@ -3,10 +3,6 @@
 import cheerio from 'cheerio';
 import path from 'path';
 
-const getPrefixFile = (url, separator) => url
-  .match(/([a-zA-Z]+(\.[a-zA-Z]+)+)/i)[0]
-  .replace(/\./ig, separator);
-
 const getNameLoadFile = (prefix, link) => `${prefix}${link.replace(/\//mig, '-')}`;
 
 // https: //ru.hexlet.io/courses
@@ -21,7 +17,7 @@ const typeAssets = [
 
 const getPageForSave = (data, pathSave, url) => {
   const { hostname: curHost } = new URL(url);
-  const prefixFile = getPrefixFile(url, '-');
+  const prefixFile = curHost.replace(/\./ig, '-');
   const assets = [];
 
   const $ = cheerio.load(data);
