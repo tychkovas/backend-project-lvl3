@@ -13,22 +13,32 @@ const getNameLoadFile = (prefix, link) => `${prefix}${link.replace(/\//mig, '-')
 // "/assets/professions/nodejs.png"
 // "ru-hexlet-io-courses_files/ru-hexlet-io-assets-professions-nodejs.png"
 
+const typeAssets = [
+  { selector: 'link', attr: 'href' },
+  { selector: 'img', attr: 'src' },
+  { selector: 'script', attr: 'src' },
+];
+
 const getPageForSave = (data, pathSave, url) => {
   const prefixFile = getPrefixFile(url, '-');
   const dataLinks = [];
 
   const $ = cheerio.load(data);
-  const img = $('img');
 
-  img.each((i, el) => {
-    const link = $(el).attr('src');
-    const { href } = new URL(link, url);
+  const findAssets = (item) => { // console.log('p', item.selector, item.attr);
+    const elements = $(item.selector);
+    elements.each((i, el) => {
+      const link = $(el).attr(item.attr);
+      const { href } = new URL(link, url);
+      const newLink = path.join(pathSave, getNameLoadFile(prefixFile, link));
+      dataLinks.push({ href, path: newLink });
 
-    const newLink = path.join(pathSave, getNameLoadFile(prefixFile, link));
-    dataLinks.push({ href, path: newLink });
+      $(el).attr(item.attr, newLink);
+    });
+  };
 
-    $(el).attr('src', newLink);
-  });
+  typeAssets.forEach(findAssets);
+
   return {
     html: $.html(),
     dataLinks,
