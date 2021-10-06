@@ -20,6 +20,7 @@ const typeAssets = [
 ];
 
 const getPageForSave = (data, pathSave, url) => {
+  const { hostname: curHost } = new URL(url);
   const prefixFile = getPrefixFile(url, '-');
   const assets = [];
 
@@ -29,11 +30,16 @@ const getPageForSave = (data, pathSave, url) => {
     const elements = $(item.selector);
     elements.each((i, el) => {
       const link = $(el).attr(item.attr);
-      const { href } = new URL(link, url);
-      const newLink = path.join(pathSave, getNameLoadFile(prefixFile, link));
-      assets.push({ href, path: newLink });
+      const { href, hostname, pathname } = new URL(link, url);
 
-      $(el).attr(item.attr, newLink);
+      if (curHost !== hostname) return;
+
+      const linkAdd = (path.extname(pathname) === '') ? pathname.concat('.html') : pathname;
+      const newPath = path.join(pathSave, getNameLoadFile(prefixFile, linkAdd));
+
+      assets.push({ href, path: newPath });
+
+      $(el).attr(item.attr, newPath);
     });
   };
 
