@@ -34,7 +34,7 @@ const pageLoad = (pageAddress, outputPath) => {
     .catch((err) => console.log('\n error axios get: err.response.status =',
       err.response.status))
     .then((data) => {
-      const { html, dataLinks } = getPageForSave(data, pathSave, pageAddress);
+      const { html, assets: dataLinks } = getPageForSave(data, pathSave, pageAddress);
       fsp.writeFile(pathSaveFile, html, 'utf-8');
       return dataLinks;
     })
