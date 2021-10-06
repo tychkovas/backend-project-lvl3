@@ -21,7 +21,7 @@ const typeAssets = [
 
 const getPageForSave = (data, pathSave, url) => {
   const prefixFile = getPrefixFile(url, '-');
-  const dataLinks = [];
+  const assets = [];
 
   const $ = cheerio.load(data);
 
@@ -31,7 +31,7 @@ const getPageForSave = (data, pathSave, url) => {
       const link = $(el).attr(item.attr);
       const { href } = new URL(link, url);
       const newLink = path.join(pathSave, getNameLoadFile(prefixFile, link));
-      dataLinks.push({ href, path: newLink });
+      assets.push({ href, path: newLink });
 
       $(el).attr(item.attr, newLink);
     });
@@ -41,7 +41,7 @@ const getPageForSave = (data, pathSave, url) => {
 
   return {
     html: $.html(),
-    dataLinks,
+    assets,
   };
 };
 
