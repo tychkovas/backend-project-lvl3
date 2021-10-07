@@ -6,14 +6,14 @@
 // import jest from 'jest';
 import nock from 'nock';
 import fsp from 'fs/promises';
-// import fs from 'fs';
+import fs from 'fs';
 import os from 'os';
 import cheerio from 'cheerio';
 import { fileURLToPath } from 'url';
 import { join, dirname } from 'path';
 import pageLoad from '../src/index';
 
-const debug = 'ON_';
+const debug = 'ON';
 
 const clog = (...par) => {
   if (debug === 'ON') console.log(...par);
@@ -27,6 +27,30 @@ clog('__dirname:', __dirname);
 const getFixturesPath = (filename) => join(__dirname, '..', '__fixtures__', filename);
 clog('getFixturesPath:', getFixturesPath('name.tmp'));
 
+const expectedAssets = [
+  {
+    pathFile: 'assets/nodejs.png',
+    link: '/assets/professions/nodejs.png',
+    pathActual: 'ru-hexlet-io-courses_files/ru-hexlet-io-assets-professions-nodejs.png',
+  },
+  {
+    link: '/assets/application.css',
+    path: 'ru-hexlet-io-courses_files/ru-hexlet-io-assets-application.css',
+  },
+  {
+    link: '/courses',
+    path: 'ru-hexlet-io-courses_files/ru-hexlet-io-courses.html',
+  },
+  {
+    link: '/assets/professions/nodejs.png',
+    path: 'ru-hexlet-io-courses_files/ru-hexlet-io-assets-professions-nodejs.png',
+  },
+  {
+    link: '/packs/js/runtime.js',
+    path: 'ru-hexlet-io-courses_files/ru-hexlet-io-packs-js-runtime.js',
+  },
+];
+
 nock.disableNetConnect();
 
 let expectedPage;
@@ -36,7 +60,13 @@ let tempDir;
 
 beforeAll(async () => {
   expectedPage = await fsp.readFile(getFixturesPath('getted_page/local_test_file.html'), 'UTF-8');
+
+  expectedAssets.forEach((item) => {
+    // item.pathFile
+  });
+
   expectedImg = await fsp.readFile(getFixturesPath('getted_page/files/local_img_nodejs.png'));
+
   resultPage = await fsp.readFile(getFixturesPath('result_page/ru_hexlet_io_courses.html'), 'UTF-8');
 });
 
@@ -51,11 +81,22 @@ test('download page', async () => {
   nock('https://ru.hexlet.io')
     // .log(debug1)
     .get('/courses')
+    .twice()
     .reply(200, expectedPage);
 
+  // nock('https://ru.hexlet.io')
+  //   .get('/assets/professions/nodejs.png')
+  //   .reply(200, expectedImg);
+
   nock('https://ru.hexlet.io')
-    .get('/assets/professions/nodejs.png')
-    .reply(200, expectedImg);
+    .get(expectedAssets[0].link)
+    .replyWithFile(200, getFixturesPath(expectedAssets[0].pathFile));
+
+  // expectedAssets.forEach((item) => {
+  //   nock('https://ru.hexlet.io')
+  //     .get(item.link)
+  //     .replyWithFile(200, item.path);
+  // });
 
   const url = 'https://ru.hexlet.io/courses';
   await pageLoad(url, tempDir);
@@ -67,11 +108,11 @@ test('download page', async () => {
   clog('rPFormated   :', resultPageFormated);
 
   expect(actualFile).toBe(resultPageFormated);
-  expect(expectedPage).toBe(expectedPage);
+  // expect(expectedPage).toBe(expectedPage);
 
-  // const pathActualImg = join(tempDir, 'ru-hexlet-io-courses_files/ru-hexlet-io-assets-professions-nodejs.png');
-  // const actualImg = fs.readFileSync(pathActualImg);
-  // expect(actualImg).toEqual(expectedImg);
+  const pathActualAssets = join(tempDir, expectedAssets[0].pathActual);
+  const actualAssets = fs.readFileSync(pathActualAssets);
+  expect(actualAssets).toEqual(expectedImg);
 });
 
 afterEach(async () => {
