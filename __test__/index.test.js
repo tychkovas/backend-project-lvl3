@@ -13,7 +13,7 @@ import { fileURLToPath } from 'url';
 import { join, dirname } from 'path';
 import pageLoad from '../src/index';
 
-const debug = 'ON';
+const debug = 'ON_';
 
 const clog = (...par) => {
   if (debug === 'ON') console.log(...par);
@@ -87,11 +87,7 @@ test('download page', async () => {
   const scope = nock('https://ru.hexlet.io')
     // .log(debug1)
     .get('/courses')
-    .twice()
     .reply(200, expectedPage);
-
-  scope.get(expectedAssets[0].link)
-    .reply(200, expectedAssets[0].file);
 
   expectedAssets.forEach((item) => {
     scope.get(item.link)
@@ -108,15 +104,14 @@ test('download page', async () => {
 
   expect(actualFile).toBe(resultPageFormated);
 
-  const pathActualAssets = join(tempDir, expectedAssets[0].pathActual);
-  console.log('pathActualAssets: ', pathActualAssets);
-  const actualAssets = fs.readFileSync(pathActualAssets);
-  expect(actualAssets).toEqual(expectedAssets[0].file);
-
-  console.log('expectedAssets: ', expectedAssets[0].file);
+  expectedAssets.forEach((item) => {
+    const pathActualAsset = join(tempDir, item.pathActual);
+    const actualAsset = fs.readFileSync(pathActualAsset, item.encding);
+    expect(actualAsset).toEqual(item.file);
+  });
 });
 
 afterEach(async () => {
-  fsp.rm(tempDir, { recursive: true });
+  await fsp.rm(tempDir, { recursive: true });
   clog('tempDir: ', tempDir);
 });
