@@ -30,6 +30,8 @@ clog('getFixturesPath:', getFixturesPath('name.tmp'));
 const getFileSync = (path, encding = null) => fs.readFileSync(getFixturesPath(path), encding);
 const getFile = (path, encding = null) => fsp.readFile(getFixturesPath(path), encding);
 
+const testingUrl = 'https://ru.hexlet.io/courses';
+
 const expectedAssets = [
   {
     pathFile: 'assets/nodejs.png',
@@ -82,28 +84,21 @@ beforeEach(async () => {
 });
 
 test('download page', async () => {
-  nock('https://ru.hexlet.io')
+  const scope = nock('https://ru.hexlet.io')
     // .log(debug1)
     .get('/courses')
     .twice()
     .reply(200, expectedPage);
 
-  nock('https://ru.hexlet.io')
-    .get(expectedAssets[0].link)
+  scope.get(expectedAssets[0].link)
     .reply(200, expectedAssets[0].file);
 
-  // nock('https://ru.hexlet.io')
-  //   .get(expectedAssets[0].link)
-  //   .replyWithFile(200, getFixturesPath(expectedAssets[0].pathFile));
+  expectedAssets.forEach((item) => {
+    scope.get(item.link)
+      .reply(200, item.file);
+  });
 
-  // expectedAssets.forEach((item) => {
-  //   nock('https://ru.hexlet.io')
-  //     .get(item.link)
-  //     .replyWithFile(200, item.path);
-  // });
-
-  const url = 'https://ru.hexlet.io/courses';
-  await pageLoad(url, tempDir);
+  await pageLoad(testingUrl, tempDir);
 
   const pathActualFile = join(tempDir, 'ru_hexlet_io_courses.html');
   const actualFile = await fsp.readFile(pathActualFile, 'UTF-8');
@@ -112,7 +107,6 @@ test('download page', async () => {
   // clog('rPFormated   :', resultPageFormated);
 
   expect(actualFile).toBe(resultPageFormated);
-  // expect(expectedPage).toBe(expectedPage);
 
   const pathActualAssets = join(tempDir, expectedAssets[0].pathActual);
   console.log('pathActualAssets: ', pathActualAssets);
