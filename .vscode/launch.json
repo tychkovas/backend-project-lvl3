@@ -5,6 +5,30 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Launch Program",
+      "program": "${workspaceFolder}/bin/page-loader.js",
+      
+      "args": [
+        "--output=/tmp/page3",
+        "https://ru.hexlet.io/courses"
+      ],
+      "request": "launch",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "type": "pwa-node"
+    },
+    {
+      "name": "Launch Transform",
+      "program": "${workspaceFolder}/src/transform.js",
+      "request": "launch",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "type": "pwa-node"
+    },
+    
+    {
       "type": "node",
       "name": "vscode-jest-tests",
       "request": "launch",
@@ -20,7 +44,10 @@
       "windows": {
         "program": "${workspaceFolder}/node_modules/jest/bin/jest"
       },
-      "runtimeArgs": ["--experimental-vm-modules"]
+      "runtimeArgs": [
+        "--experimental-vm-modules",
+        "--trace-warnings",
+      ]
     }
   ]
 }
