@@ -6,7 +6,7 @@ import fsp from 'fs/promises';
 import { fileURLToPath } from 'url';
 import { join, dirname } from 'path';
 import cheerio from 'cheerio';
-import getPageForSave from '../src/transform';
+import getPageForSave from '../src/transform.js';
 
 const debug = 'ON_';
 const clog = (...par) => {
@@ -21,7 +21,7 @@ let expectedPage;
 let resultPage;
 
 beforeAll(async () => {
-  expectedPage = await fsp.readFile(getFixturesPath('getted_page/local_test_file.html'), 'UTF-8');
+  expectedPage = await fsp.readFile(getFixturesPath('getted_page/received_page.html'), 'UTF-8');
   resultPage = await fsp.readFile(getFixturesPath('result_page/ru_hexlet_io_courses.html'), 'UTF-8');
 });
 
