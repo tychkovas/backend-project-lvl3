@@ -22,6 +22,8 @@ const getPageForSave = (data, pathSave, url) => {
     const elements = $(item.selector);
     elements.each((i, el) => {
       const link = $(el).attr(item.attr);
+      if (!link) return;
+
       const { href, hostname, pathname } = new URL(link, url);
 
       if (curHost !== hostname) return;
