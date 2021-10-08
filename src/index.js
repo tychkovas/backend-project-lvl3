@@ -30,10 +30,24 @@ const pageLoad = (pageAddress, outputPath) => {
   const pathSave = getNameDir(getNameFile(pageAddress, '-'));
   const pathSaveDir = join(outputPath, pathSave);
 
+  const checkOrCreatOutputPath = (response) => fsp
+  // eslint-disable-next-line no-bitwise
+    .access(outputPath, fs.constants.R_OK | fs.constants.W_OK)
+    // .then(() => response)
+    .catch(() => fsp.mkdir(outputPath, { recursive: true }))
+    .then(() => {
+      console.error(' mkdir +++!');
+      // .catch(() => console.error('cannot access ----', outputPath)));
+      return response;
+    });
+
   return axios.get(pageAddress)
-    .then((response) => response.data)
     .catch((err) => console.log('\n error axios get: err.response.status =',
       err.response.status))
+    .then(checkOrCreatOutputPath)
+    .then((response) => response.data)
+    .catch(() => console.error('cannot access  !!', outputPath))
+    .then((response) => response.data)
     .then((data) => {
       const { html, assets: dataLinks } = getPageForSave(data, pathSave, pageAddress);
       fsp.writeFile(pathSaveFile, html, 'utf-8');
