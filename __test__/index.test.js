@@ -27,6 +27,9 @@ clog('__dirname:', __dirname);
 const getFixturesPath = (filename) => join(__dirname, '..', '__fixtures__', filename);
 clog('getFixturesPath:', getFixturesPath('name.tmp'));
 
+const getFileSync = (path, encding = null) => fs.readFileSync(getFixturesPath(path), encding);
+const getFile = (path, encding = null) => fsp.readFile(getFixturesPath(path), encding);
+
 const expectedAssets = [
   {
     pathFile: 'assets/nodejs.png',
@@ -59,15 +62,15 @@ let resultPage;
 let tempDir;
 
 beforeAll(async () => {
-  expectedPage = await fsp.readFile(getFixturesPath('getted_page/local_test_file.html'), 'UTF-8');
+  expectedPage = await getFile('getted_page/local_test_file.html', 'UTF-8');
 
   expectedAssets.forEach((item) => {
     // item.pathFile
   });
 
-  expectedImg = await fsp.readFile(getFixturesPath('getted_page/files/local_img_nodejs.png'));
+  expectedImg = getFileSync('getted_page/files/local_img_nodejs.png');
 
-  resultPage = await fsp.readFile(getFixturesPath('result_page/ru_hexlet_io_courses.html'), 'UTF-8');
+  resultPage = await getFile('result_page/ru_hexlet_io_courses.html', 'UTF-8');
 });
 
 beforeEach(async () => {
