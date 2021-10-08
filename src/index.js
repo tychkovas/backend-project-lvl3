@@ -17,7 +17,8 @@ const loadFiles = ({ href, path: pathSave }, _outputPath) => axios({
   url: href,
   responseType: 'stream',
 })
-  .catch((error) => console.log('\n error axios =', error))
+  .catch((error) => console.log('\n error axios get status',
+    error.response.status, ', url =', error.config.url))
   .then((response) => {
     response.data.pipe(fs.createWriteStream(path.join(_outputPath, pathSave)));
   })
