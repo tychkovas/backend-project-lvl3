@@ -33,42 +33,43 @@ const getFile = (path, encding = null) => fsp.readFile(getFixturesPath(path), en
 const expectedAssets = [
   {
     pathFile: 'assets/nodejs.png',
+    encding: null,
     link: '/assets/professions/nodejs.png',
     pathActual: 'ru-hexlet-io-courses_files/ru-hexlet-io-assets-professions-nodejs.png',
   },
   {
+    pathFile: 'assets/application.css',
+    encding: null,
     link: '/assets/application.css',
-    path: 'ru-hexlet-io-courses_files/ru-hexlet-io-assets-application.css',
+    pathActual: 'ru-hexlet-io-courses_files/ru-hexlet-io-assets-application.css',
   },
   {
+    pathFile: 'getted_page/received_page.html',
+    encding: 'UTF-8',
     link: '/courses',
-    path: 'ru-hexlet-io-courses_files/ru-hexlet-io-courses.html',
+    pathActual: 'ru-hexlet-io-courses_files/ru-hexlet-io-courses.html',
   },
   {
-    link: '/assets/professions/nodejs.png',
-    path: 'ru-hexlet-io-courses_files/ru-hexlet-io-assets-professions-nodejs.png',
-  },
-  {
+    pathFile: 'assets/runtime.js',
+    encding: null,
     link: '/packs/js/runtime.js',
-    path: 'ru-hexlet-io-courses_files/ru-hexlet-io-packs-js-runtime.js',
+    pathActual: 'ru-hexlet-io-courses_files/ru-hexlet-io-packs-js-runtime.js',
   },
 ];
 
 nock.disableNetConnect();
 
 let expectedPage;
-let expectedImg;
 let resultPage;
 let tempDir;
 
 beforeAll(async () => {
-  expectedPage = await getFile('getted_page/local_test_file.html', 'UTF-8');
+  expectedPage = await getFile('getted_page/received_page.html', 'UTF-8');
 
   expectedAssets.forEach((item) => {
-    // item.pathFile
+    const file = getFileSync(item.pathFile, item.encding);
+    Object.assign(item, { file });
   });
-
-  expectedImg = getFileSync('getted_page/files/local_img_nodejs.png');
 
   resultPage = await getFile('result_page/ru_hexlet_io_courses.html', 'UTF-8');
 });
@@ -87,13 +88,13 @@ test('download page', async () => {
     .twice()
     .reply(200, expectedPage);
 
-  // nock('https://ru.hexlet.io')
-  //   .get('/assets/professions/nodejs.png')
-  //   .reply(200, expectedImg);
-
   nock('https://ru.hexlet.io')
     .get(expectedAssets[0].link)
-    .replyWithFile(200, getFixturesPath(expectedAssets[0].pathFile));
+    .reply(200, expectedAssets[0].file);
+
+  // nock('https://ru.hexlet.io')
+  //   .get(expectedAssets[0].link)
+  //   .replyWithFile(200, getFixturesPath(expectedAssets[0].pathFile));
 
   // expectedAssets.forEach((item) => {
   //   nock('https://ru.hexlet.io')
@@ -108,14 +109,17 @@ test('download page', async () => {
   const actualFile = await fsp.readFile(pathActualFile, 'UTF-8');
 
   const resultPageFormated = cheerio.load(resultPage).html();
-  clog('rPFormated   :', resultPageFormated);
+  // clog('rPFormated   :', resultPageFormated);
 
   expect(actualFile).toBe(resultPageFormated);
   // expect(expectedPage).toBe(expectedPage);
 
   const pathActualAssets = join(tempDir, expectedAssets[0].pathActual);
+  console.log('pathActualAssets: ', pathActualAssets);
   const actualAssets = fs.readFileSync(pathActualAssets);
-  expect(actualAssets).toEqual(expectedImg);
+  expect(actualAssets).toEqual(expectedAssets[0].file);
+
+  console.log('expectedAssets: ', expectedAssets[0].file);
 });
 
 afterEach(async () => {
