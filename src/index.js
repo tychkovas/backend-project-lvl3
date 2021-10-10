@@ -31,22 +31,15 @@ const pageLoad = (pageAddress, outputPath) => {
   const pathSaveDir = join(outputPath, pathSave);
 
   const checkOrCreatOutputPath = (response) => fsp
-  // eslint-disable-next-line no-bitwise
-    .access(outputPath, fs.constants.R_OK | fs.constants.W_OK)
-    // .then(() => response)
+    .access(outputPath, fs.constants.F_OK)
     .catch(() => fsp.mkdir(outputPath, { recursive: true }))
-    .then(() => {
-      console.error(' mkdir +++!');
-      // .catch(() => console.error('cannot access ----', outputPath)));
-      return response;
-    });
+    .then(() => response);
 
   return axios.get(pageAddress)
     .catch((err) => console.log('\n error axios get: err.response.status =',
       err.response.status))
     .then(checkOrCreatOutputPath)
-    .then((response) => response.data)
-    .catch(() => console.error('cannot access  !!', outputPath))
+    .catch(() => console.error('cannot access output path', outputPath))
     .then((response) => response.data)
     .then((data) => {
       const { html, assets: dataLinks } = getPageForSave(data, pathSave, pageAddress);
