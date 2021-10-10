@@ -30,7 +30,7 @@ const pageLoad = (pageAddress, outputPath) => {
   const pathSave = getNameDir(getNameFile(pageAddress, '-'));
   const pathSaveDir = join(outputPath, pathSave);
 
-  const checkOrCreatOutputPath = (response) => fsp
+  const checkOrCreateOutputPath = (response) => fsp
     .access(outputPath, fs.constants.F_OK)
     .catch(() => fsp.mkdir(outputPath, { recursive: true }))
     .then(() => response);
@@ -38,7 +38,7 @@ const pageLoad = (pageAddress, outputPath) => {
   return axios.get(pageAddress)
     .catch((err) => console.log('\n error axios get: err.response.status =',
       err.response.status))
-    .then(checkOrCreatOutputPath)
+    .then(checkOrCreateOutputPath)
     .catch(() => console.error('cannot access output path', outputPath))
     .then((response) => response.data)
     .then((data) => {
