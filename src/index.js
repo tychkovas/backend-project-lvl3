@@ -3,7 +3,7 @@ import path, { join } from 'path';
 import axios from 'axios';
 import fs, { promises as fsp } from 'fs';
 
-import getPageForSave from './transform.js';
+import getPageForSave from './parsing.js';
 
 const getNameFile = (url, separator = '') => url.replace(/^\w*?:\/\//mi, '')
   .replace(/\/$/, '')

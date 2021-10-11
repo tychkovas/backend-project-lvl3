@@ -6,7 +6,7 @@ import fsp from 'fs/promises';
 import { fileURLToPath } from 'url';
 import { join, dirname } from 'path';
 import cheerio from 'cheerio';
-import getPageForSave from '../src/transform.js';
+import getPageForSave from '../src/parsing';
 
 const debug = 'ON_';
 const clog = (...par) => {
