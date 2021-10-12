@@ -1,9 +1,17 @@
 /* eslint-disable max-len */
 import path, { join } from 'path';
 import axios from 'axios';
+import 'axios-debug-log';
+import debug from 'debug';
 import fs, { promises as fsp } from 'fs';
 
 import getPageForSave from './parsing.js';
+
+const nameSpaceLog = 'page-loader';
+
+const log = debug(nameSpaceLog);
+
+debug('booting %o', nameSpaceLog);
 
 const getNameFile = (url, separator = '') => url.replace(/^\w*?:\/\//mi, '')
   .replace(/\/$/, '')
@@ -20,6 +28,7 @@ const loadFiles = ({ href, path: pathSave }, _outputPath) => axios({
   .catch((error) => console.log('\n error axios get status',
     error.response.status, ', url =', error.config.url))
   .then((response) => {
+    log('load file:', href);
     response.data.pipe(fs.createWriteStream(path.join(_outputPath, pathSave)));
   })
   .catch((error) => console.log('\n error write file =', error));
@@ -35,6 +44,8 @@ const pageLoad = (pageAddress, outputPath) => {
     .catch(() => fsp.mkdir(outputPath, { recursive: true }))
     .then(() => response);
 
+  log('load html:', pageAddress);
+
   return axios.get(pageAddress)
     .catch((err) => console.log('\n error axios get: err.response.status =',
       err.response.status))
@@ -43,6 +54,7 @@ const pageLoad = (pageAddress, outputPath) => {
     .then((response) => response.data)
     .then((data) => {
       const { html, assets: dataLinks } = getPageForSave(data, pathSave, pageAddress);
+      log('save html:', pathSaveFile);
       fsp.writeFile(pathSaveFile, html, 'utf-8');
       return dataLinks;
     })
