@@ -32,6 +32,17 @@ jobs:
           make lint
           make test
 
+      - name: Test & publish code coverage
+        # Publish code coverage on Code Climate
+        # https://github.com/paambaati/codeclimate-action
+        uses: paambaati/codeclimate-action@v2.4.0
+        # Add Code Climate secret key
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+        with:
+          coverageCommand: make test-coverage
+          debug: true
+
       # Runs a single command using the runners shell
       - name: Run a one-line script
         run: echo Hello, world!
