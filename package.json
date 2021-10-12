@@ -13,7 +13,9 @@
   },
   "scripts": {
     "test": "npx jest",
-    "run": "node bin/page-loader.js --output /var/tmp https://ru.hexlet.io/courses"
+    "test_debug": "DEBUG=axios,nock.*,page-loader npx jest",
+    "run": "node bin/page-loader.js --output /var/tmp https://ru.hexlet.io/courses",
+    "debug": "DEBUG=page-loader node bin/page-loader.js --output /tmp/page_save https://ru.hexlet.io/courses"
   },
   "repository": {
     "type": "git",

@@ -5,6 +5,9 @@ install-deps:
 
 test:
 	npm test
+
+test_debug:
+	npm run test_debug
 	
 test-coverage:
 	npm test -- --coverage
