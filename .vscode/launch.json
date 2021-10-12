@@ -30,7 +30,7 @@
     
     {
       "type": "node",
-      "name": "vscode-jest-tests",
+      "name": "jest-tests",
       "request": "launch",
       "args": [
         "--runInBand",
@@ -47,6 +47,30 @@
       "runtimeArgs": [
         "--experimental-vm-modules",
         "--trace-warnings",
+      ]
+    },
+
+    {
+      "type": "node",
+      "name": "jest-tests-debug",
+      "request": "launch",
+      "args": [
+        "--runInBand",
+        "--watchAll=false"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "disableOptimisticBPs": true,
+      "program": "${workspaceFolder}/node_modules/.bin/jest",
+      "windows": {
+        "program": "${workspaceFolder}/node_modules/jest/bin/jest"
+      },
+      "env": {
+        "DEBUG": "axios,nock.*,page-loader"
+      },
+      "runtimeArgs": [
+        "--experimental-vm-modules",
       ]
     }
   ]
