@@ -45,7 +45,8 @@ const pageLoad = (pageAddress, outputPath) => {
 
   const checkOrCreateOutputPath = (response) => fsp
     .access(outputPath, fs.constants.F_OK)
-    .catch(() => fsp.mkdir(outputPath, { recursive: true }))
+    .catch(() => fsp.mkdir(outputPath, { recursive: true })
+      .then(() => log('directory creation:', outputPath)))
     .then(() => response);
 
   log('load html:', pageAddress);
@@ -65,6 +66,7 @@ const pageLoad = (pageAddress, outputPath) => {
     .catch((error) => console.error('error write page:', error.message))
     .then((dataLinks) => {
       if (dataLinks.length > 0) {
+        log('creating a folder:', nameSaveFile);
         fsp.mkdir(pathSaveDir);
       }
       return dataLinks;
