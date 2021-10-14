@@ -23,13 +23,13 @@ const getNameDir = (nameFile) => path.parse(nameFile).name.concat('_files');
 const loadFiles = ({ href, path: pathSave }, _outputPath) => axios({
   method: 'get',
   url: href,
-  responseType: 'stream',
+  responseType: 'arraybuffer',
 })
   .catch((error) => console.log('\n error axios get status',
     error.response.status, ', url =', error.config.url))
   .then((response) => {
     log('load file:', href);
-    response.data.pipe(fs.createWriteStream(path.join(_outputPath, pathSave)));
+    return fsp.writeFile(path.join(_outputPath, pathSave), response.data);
   })
   .catch((error) => console.log('\n error write file =', error));
 
