@@ -25,13 +25,13 @@ const loadFiles = ({ href, path: pathSave }, _outputPath) => axios({
   url: href,
   responseType: 'arraybuffer',
 })
-  .catch((error) => console.log('\n error axios get status',
+  .catch((error) => console.error('\n error axios get status',
     error.response.status, ', url =', error.config.url))
   .then((response) => {
     log('load file:', href);
     return fsp.writeFile(path.join(_outputPath, pathSave), response.data);
   })
-  .catch((error) => console.log('\n error write file =', error));
+  .catch((error) => console.error('\n error write file =', error));
 
 const pageLoad = (pageAddress, outputPath) => {
   const nameSaveFile = getNameFile(pageAddress, '_');
@@ -47,7 +47,7 @@ const pageLoad = (pageAddress, outputPath) => {
   log('load html:', pageAddress);
 
   return axios.get(pageAddress)
-    .catch((err) => console.log('\n error axios get: err.response.status =',
+    .catch((err) => console.error('\n error axios get: err.response.status =',
       err.response.status))
     .then(checkOrCreateOutputPath)
     .catch(() => console.error('cannot access output path', outputPath))
@@ -58,16 +58,16 @@ const pageLoad = (pageAddress, outputPath) => {
       fsp.writeFile(pathSaveFile, html, 'utf-8');
       return dataLinks;
     })
-    .catch((error) => console.log('\n error writeFile page =', error))
+    .catch((error) => console.error('\n error writeFile page =', error))
     .then((dataLinks) => {
       if (dataLinks.length > 0) {
         fsp.mkdir(pathSaveDir);
       }
       return dataLinks;
     })
-    .catch((error) => console.log('\n error mkdir =', error))
+    .catch((error) => console.error('\n error mkdir =', error))
     .then((dataLinks) => Promise.all(dataLinks.map((item) => loadFiles(item, outputPath))))
-    .catch((error) => console.log('\n error Promise all =', error))
+    .catch((error) => console.error('\n error Promise all =', error))
     .then(() => pathSaveFile);
 };
 
