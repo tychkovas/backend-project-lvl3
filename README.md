@@ -25,3 +25,7 @@ $ sudo npm link
 [![asciicast](https://asciinema.org/a/5Mz6ApchGieaH2Y8M8EwUDgeI.svg)](https://asciinema.org/a/5Mz6ApchGieaH2Y8M8EwUDgeI)
 
 [![asciicast](https://asciinema.org/a/441417.svg)](https://asciinema.org/a/441417)
+
+
+#### demonstrates debug mode
+[![asciicast](https://asciinema.org/a/0G5ASO8PZ75vW7qSabN75uXYI.svg)](https://asciinema.org/a/0G5ASO8PZ75vW7qSabN75uXYI)
