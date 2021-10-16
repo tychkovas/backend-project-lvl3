@@ -27,13 +27,10 @@ const loadFiles = ({ href, path: pathSave }, _outputPath) => {
     url: href,
     responseType: 'arraybuffer',
   })
-    // .catch((error) => console.error('error axios get status',
-    //   error.response.status, ', url =', error.config.url))
     .then((response) => {
       log('save file:', href, 'name:', pathSave);
       return fsp.writeFile(path.join(_outputPath, pathSave), response.data);
     });
-    // .catch((error) => console.error('error write file:', error.message));
 };
 
 const pageLoad = (pageAddress, outputPath) => {
@@ -57,7 +54,6 @@ const pageLoad = (pageAddress, outputPath) => {
         .then(() => dataLinks);
     })
     .then((dataLinks) => Promise.all(dataLinks.map((item) => loadFiles(item, outputPath))))
-    // .catch((error) => console.error('error loadFiles =', error.message))
     .then(() => log('finish load %o/n', nameSpaceLog))
     .then(() => pathSaveFile);
 };
