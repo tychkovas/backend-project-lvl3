@@ -81,6 +81,7 @@ beforeEach(async () => {
   // tempDir = '/tmp/page-loader';
   // fs.mkdirSync('/tmp/page-loader');
   clog('tempDir: ', tempDir);
+  nock.cleanAll();
 });
 
 test('download page', async () => {
@@ -94,7 +95,8 @@ test('download page', async () => {
       .reply(200, item.file);
   });
 
-  await pageLoad(testingUrl, tempDir);
+  await expect(pageLoad(testingUrl, tempDir))
+    .resolves.toEqual(join(tempDir, 'ru_hexlet_io_courses.html'));
 
   const pathActualFile = join(tempDir, 'ru_hexlet_io_courses.html');
   const actualFile = await fsp.readFile(pathActualFile, 'UTF-8');
@@ -108,6 +110,43 @@ test('download page', async () => {
     const pathActualAsset = join(tempDir, item.pathActual);
     const actualAsset = fs.readFileSync(pathActualAsset, item.encding);
     expect(actualAsset).toEqual(item.file);
+  });
+});
+
+describe('error situations', () => {
+  test('Nock: Not found 404', async () => {
+    nock('https://ru.hexlet.io')
+      .get('/courses')
+      .reply(404);
+
+    await expect(pageLoad(testingUrl, tempDir))
+      .rejects
+      .toThrow('Request failed with status code 404');
+  });
+  test('Nock: Not found', async () => {
+    nock('https://ru.hexlet.io')
+      .get('/courses')
+      .replyWithError('Not found');
+
+    await expect(pageLoad(testingUrl, tempDir))
+      .rejects
+      .toThrow('Not found');
+  });
+
+  test('Nock: Disallowed net connect', async () => {
+    await expect(pageLoad(testingUrl, tempDir))
+      .rejects
+      .toThrow('Nock: Disallowed net connect for "ru.hexlet.io:443/courses"');
+  });
+  test('Nock: No match for request', async () => {
+    nock.cleanAll();
+    nock('https://ru.hexlet.io')
+      .get('/')
+      .reply(200);
+
+    await expect(pageLoad(testingUrl, tempDir))
+      .rejects
+      .toThrow('Nock: No match for request');
   });
 });
 
