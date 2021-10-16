@@ -27,13 +27,13 @@ const loadFiles = ({ href, path: pathSave }, _outputPath) => {
     url: href,
     responseType: 'arraybuffer',
   })
-    .catch((error) => console.error('error axios get status',
-      error.response.status, ', url =', error.config.url))
+    // .catch((error) => console.error('error axios get status',
+    //   error.response.status, ', url =', error.config.url))
     .then((response) => {
       log('save file:', href, 'name:', pathSave);
       return fsp.writeFile(path.join(_outputPath, pathSave), response.data);
-    })
-    .catch((error) => console.error('error write file:', error.message));
+    });
+  // .catch((error) => console.error('error write file:', error.message));
 };
 
 const pageLoad = (pageAddress, outputPath) => {
@@ -45,35 +45,36 @@ const pageLoad = (pageAddress, outputPath) => {
 
   const checkOrCreateOutputPath = (response) => fsp
     .access(outputPath, fs.constants.F_OK)
-    .catch(() => fsp.mkdir(outputPath, { recursive: true })
-      .then(() => log('directory creation:', outputPath)))
+    // .catch(() => fsp.mkdir(outputPath, { recursive: true })
+    //   .then(() => log('directory creation:', outputPath)))
     .then(() => response);
 
   log('load html:', pageAddress);
 
   return axios.get(pageAddress)
-    .catch((err) => console.error('error load html, status:',
-      err.response.status, err.message))
+    // .catch((err) => console.error('error load html, status:',
+    //   err.response.status, err.message))
     .then(checkOrCreateOutputPath)
-    .catch(() => console.error('cannot access output path', outputPath))
+    // .catch(() => console.error('cannot access output path', outputPath))
     .then((response) => response.data)
     .then((data) => {
       const { html, assets: dataLinks } = getPageForSave(data, pathSave, pageAddress);
       log('save html:', pathSaveFile);
-      fsp.writeFile(pathSaveFile, html, 'utf-8');
-      return dataLinks;
+      return fsp.writeFile(pathSaveFile, html, 'utf-8')
+        .then(() => dataLinks);
     })
-    .catch((error) => console.error('error write page:', error.message))
+    // .catch((error) => console.error('error write page:', error.message))
     .then((dataLinks) => {
       if (dataLinks.length > 0) {
         log('creating a folder:', nameSaveFile);
-        fsp.mkdir(pathSaveDir);
+        return fsp.mkdir(pathSaveDir)
+          .then(() => dataLinks);
       }
       return dataLinks;
     })
-    .catch((error) => console.error('error mkdir =', error.message))
+    // .catch((error) => console.error('error mkdir =', error.message))
     .then((dataLinks) => Promise.all(dataLinks.map((item) => loadFiles(item, outputPath))))
-    .catch((error) => console.error('error loadFiles =', error.message))
+    // .catch((error) => console.error('error loadFiles =', error.message))
     .then(() => log('finish load %o', nameSpaceLog))
     .then(() => pathSaveFile);
 };
