@@ -115,6 +115,8 @@ test('download page', async () => {
 
 describe('error situations', () => {
   test('file already exists', async () => {
+    fs.mkdirSync(join(tempDir, 'ru-hexlet-io-courses_files'));
+
     const scope = nock('https://ru.hexlet.io')
       .get('/courses')
       .reply(200, expectedPage);
@@ -124,11 +126,25 @@ describe('error situations', () => {
         .reply(200, item.file);
     });
 
-    fs.mkdirSync(join(tempDir, 'ru-hexlet-io-courses_files'));
-
     await expect(pageLoad(testingUrl, tempDir))
       .rejects
       .toThrow('EEXIST: file already exists');
+  });
+  test('permission denied', async () => {
+    const scope = nock('https://ru.hexlet.io')
+      .get('/courses')
+      .twice()
+      .reply(200, expectedPage);
+
+    expectedAssets.forEach((item) => {
+      scope.get(item.link)
+        .twice()
+        .reply(200, item.file);
+    });
+
+    await expect(pageLoad(testingUrl, '/'))
+      .rejects
+      .toThrow('EACCES: permission denied');
   });
 
   test('non-existing directory', async () => {
