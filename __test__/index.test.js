@@ -114,6 +114,34 @@ test('download page', async () => {
 });
 
 describe('error situations', () => {
+  test('file already exists', async () => {
+    const scope = nock('https://ru.hexlet.io')
+      .get('/courses')
+      .reply(200, expectedPage);
+
+    expectedAssets.forEach((item) => {
+      scope.get(item.link)
+        .reply(200, item.file);
+    });
+
+    fs.mkdirSync(join(tempDir, 'ru-hexlet-io-courses_files'));
+
+    await expect(pageLoad(testingUrl, tempDir))
+      .rejects
+      .toThrow('EEXIST: file already exists');
+  });
+
+  test('non-existing directory', async () => {
+    nock('https://ru.hexlet.io')
+      .get('/courses')
+      .reply(200, expectedPage);
+
+    const nonExistingDir = join(tempDir, 'nonExisting');
+
+    await expect(pageLoad(testingUrl, nonExistingDir))
+      .rejects
+      .toThrow('ENOENT: no such file or directory');
+  });
   test('Nock: Not found 404', async () => {
     nock('https://ru.hexlet.io')
       .get('/courses')
