@@ -15,8 +15,12 @@ program
   .arguments('<pageAddress>')
   .action(async (pageAddress, options) => {
     // console.log('current directory =', process.cwd());
-    const pathToLoadFile = await pageLoad(pageAddress, options.output);
-    console.log(pathToLoadFile);
+    pageLoad(pageAddress, options.output)
+      .then((pathSave) => console.log('Saved successfully:', pathSave))
+      .catch((error) => {
+        console.error('Error:', error.message);
+        process.exit(1);
+      });
   });
 
 program.parse(process.argv);
