@@ -12,6 +12,7 @@ import cheerio from 'cheerio';
 import { fileURLToPath } from 'url';
 import { join, dirname } from 'path';
 import pageLoad from '../src/index';
+// import { describe } from 'jest-circus';
 
 const debug = 'ON_';
 
@@ -31,6 +32,8 @@ const getFileSync = (path, encding = null) => fs.readFileSync(getFixturesPath(pa
 const getFile = (path, encding = null) => fsp.readFile(getFixturesPath(path), encding);
 
 const testingUrl = 'https://ru.hexlet.io/courses';
+const testOrigin = 'https://ru.hexlet.io/';
+const testPathName = '/courses';
 
 const expectedAssets = [
   {
@@ -85,9 +88,9 @@ beforeEach(async () => {
 });
 
 test('download page', async () => {
-  const scope = nock('https://ru.hexlet.io')
+  const scope = nock(testOrigin)
     // .log(debug1)
-    .get('/courses')
+    .get(testPathName)
     .reply(200, expectedPage);
 
   expectedAssets.forEach((item) => {
@@ -117,8 +120,8 @@ describe('error situations', () => {
   test('file already exists', async () => {
     fs.mkdirSync(join(tempDir, 'ru-hexlet-io-courses_files'));
 
-    const scope = nock('https://ru.hexlet.io')
-      .get('/courses')
+    const scope = nock(testOrigin)
+      .get(testPathName)
       .reply(200, expectedPage);
 
     expectedAssets.forEach((item) => {
@@ -131,8 +134,8 @@ describe('error situations', () => {
       .toThrow('EEXIST: file already exists');
   });
   test('permission denied', async () => {
-    const scope = nock('https://ru.hexlet.io')
-      .get('/courses')
+    const scope = nock(testOrigin)
+      .get(testPathName)
       .twice()
       .reply(200, expectedPage);
 
