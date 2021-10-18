@@ -62,11 +62,35 @@ const expectedAssets = [
   },
 ];
 
-nock.disableNetConnect();
+const dataTestError = [
+  ['Request failed with status code 404',
+    {
+      setUrl: testingUrl,
+      replyArg: [404],
+      testUrl: testingUrl,
+    },
+  ],
+  ['Request failed with status code 500',
+    {
+      setUrl: testingUrl,
+      replyArg: [500],
+      testUrl: testingUrl,
+    },
+  ],
+  ['Nock: No match for request',
+    {
+      setUrl: 'https://ru.hexlet.io/',
+      replyArg: [200],
+      testUrl: testingUrl,
+    },
+  ],
+];
 
 let expectedPage;
 let resultPage;
 let tempDir;
+
+nock.disableNetConnect();
 
 beforeAll(async () => {
   expectedPage = await getFile('getted_page/received_page.html', 'UTF-8');
@@ -161,16 +185,20 @@ describe('error situations', () => {
       .rejects
       .toThrow('ENOENT: no such file or directory');
   });
-  test('Nock: Not found 404', async () => {
-    nock('https://ru.hexlet.io')
-      .get('/courses')
-      .reply(404);
 
-    await expect(pageLoad(testingUrl, tempDir))
-      .rejects
-      .toThrow('Request failed with status code 404');
+  describe('errors net', () => {
+    test.each(dataTestError)('test: %s', async (error, data) => {
+      const { origin, pathname } = new URL(data.setUrl);
+      nock(origin)
+        .get(pathname)
+        .reply(...data.replyArg);
+
+      await expect(pageLoad(data.testUrl, tempDir))
+        .rejects
+        .toThrow(error);
+    });
   });
-  test('Nock: Not found', async () => {
+  test('errors net: Nock: Not found', async () => {
     nock('https://ru.hexlet.io')
       .get('/courses')
       .replyWithError('Not found');
@@ -179,21 +207,10 @@ describe('error situations', () => {
       .rejects
       .toThrow('Not found');
   });
-
-  test('Nock: Disallowed net connect', async () => {
+  test('errors net: Nock: Disallowed net connect', async () => {
     await expect(pageLoad(testingUrl, tempDir))
       .rejects
       .toThrow('Nock: Disallowed net connect for "ru.hexlet.io:443/courses"');
-  });
-  test('Nock: No match for request', async () => {
-    nock.cleanAll();
-    nock('https://ru.hexlet.io')
-      .get('/')
-      .reply(200);
-
-    await expect(pageLoad(testingUrl, tempDir))
-      .rejects
-      .toThrow('Nock: No match for request');
   });
 });
 
