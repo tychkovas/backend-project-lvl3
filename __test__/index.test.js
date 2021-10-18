@@ -126,7 +126,7 @@ beforeEach(async () => {
   nock.cleanAll();
 });
 
-test('download page', async () => {
+test('successful loading page', async () => {
   const scope = nock(testOrigin)
     // .log(debug1)
     .get(testPathName)
@@ -156,23 +156,6 @@ test('download page', async () => {
 });
 
 describe('error situations', () => {
-  test('file already exists', async () => {
-    fs.mkdirSync(join(tempDir, 'ru-hexlet-io-courses_files'));
-
-    const scope = nock(testOrigin)
-      .get(testPathName)
-      .reply(200, expectedPage);
-
-    expectedAssets.forEach((item) => {
-      scope.get(item.link)
-        .reply(200, item.file);
-    });
-
-    await expect(pageLoad(testingUrl, tempDir))
-      .rejects
-      .toThrow('EEXIST: file already exists');
-  });
-
   describe('fs', () => {
     test.each(dataFsError)('fs: %s', async (_name, data) => {
       nock(testOrigin)
@@ -185,8 +168,20 @@ describe('error situations', () => {
     });
   });
 
-  describe('errors net', () => {
-    test.each(dataTestError)('test: %s', async (error, data) => {
+  test('fs: file already exists', async () => {
+    fs.mkdirSync(join(tempDir, 'ru-hexlet-io-courses_files'));
+
+    nock(testOrigin)
+      .get(testPathName)
+      .reply(200, expectedPage);
+
+    await expect(pageLoad(testingUrl, tempDir))
+      .rejects
+      .toThrow('EEXIST: file already exists');
+  });
+
+  describe('net', () => {
+    test.each(dataTestError)('net: %s', async (error, data) => {
       const { origin, pathname } = new URL(data.setUrl);
       nock(origin)
         .get(pathname)
@@ -197,7 +192,8 @@ describe('error situations', () => {
         .toThrow(error);
     });
   });
-  test('errors net: Nock: Not found', async () => {
+
+  test('net: Nock: Not found', async () => {
     nock('https://ru.hexlet.io')
       .get('/courses')
       .replyWithError('Not found');
@@ -205,11 +201,6 @@ describe('error situations', () => {
     await expect(pageLoad(testingUrl, tempDir))
       .rejects
       .toThrow('Not found');
-  });
-  test('errors net: Nock: Disallowed net connect', async () => {
-    await expect(pageLoad(testingUrl, tempDir))
-      .rejects
-      .toThrow('Nock: Disallowed net connect for "ru.hexlet.io:443/courses"');
   });
 });
 
