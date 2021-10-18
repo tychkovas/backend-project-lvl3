@@ -18,7 +18,7 @@ const getFixturesPath = (filename) => join(__dirname, '..', '__fixtures__', file
 const getFileSync = (path, encding = null) => fs.readFileSync(getFixturesPath(path), encding);
 const getFile = (path, encding = null) => fsp.readFile(getFixturesPath(path), encding);
 
-const testingUrl = 'https://ru.hexlet.io/courses';
+const testUrl = 'https://ru.hexlet.io/courses';
 const testOrigin = 'https://ru.hexlet.io/';
 const testPathName = '/courses';
 
@@ -52,23 +52,20 @@ const expectedAssets = [
 const dataNetError = [
   ['Request failed with status code 404',
     {
-      setUrl: testingUrl,
+      setUrl: testUrl,
       replyArg: [404],
-      testUrl: testingUrl,
     },
   ],
   ['Request failed with status code 500',
     {
-      setUrl: testingUrl,
+      setUrl: testUrl,
       replyArg: [500],
-      testUrl: testingUrl,
     },
   ],
   ['Nock: No match for request',
     {
       setUrl: 'https://ru.hexlet.io/',
       replyArg: [200],
-      testUrl: testingUrl,
     },
   ],
 ];
@@ -120,7 +117,7 @@ test('successful loading page', async () => {
       .reply(200, item.file);
   });
 
-  await expect(pageLoad(testingUrl, tempDir))
+  await expect(pageLoad(testUrl, tempDir))
     .resolves.toEqual(join(tempDir, 'ru_hexlet_io_courses.html'));
 
   const pathActualFile = join(tempDir, 'ru_hexlet_io_courses.html');
@@ -144,7 +141,7 @@ describe('error situations', () => {
         .get(testPathName)
         .reply(200, expectedPage);
 
-      await expect(pageLoad(testingUrl, data.outputPath))
+      await expect(pageLoad(testUrl, data.outputPath))
         .rejects
         .toThrow(data.error);
     });
@@ -157,7 +154,7 @@ describe('error situations', () => {
       .get(testPathName)
       .reply(200, expectedPage);
 
-    await expect(pageLoad(testingUrl, tempDir))
+    await expect(pageLoad(testUrl, tempDir))
       .rejects
       .toThrow('EEXIST: file already exists');
   });
@@ -165,22 +162,23 @@ describe('error situations', () => {
   describe('net', () => {
     test.each(dataNetError)('net: %s', async (error, data) => {
       const { origin, pathname } = new URL(data.setUrl);
+
       nock(origin)
         .get(pathname)
         .reply(...data.replyArg);
 
-      await expect(pageLoad(data.testUrl, tempDir))
+      await expect(pageLoad(testUrl, tempDir))
         .rejects
         .toThrow(error);
     });
   });
 
   test('net: Nock: Not found', async () => {
-    nock('https://ru.hexlet.io')
-      .get('/courses')
+    nock(testOrigin)
+      .get(testPathName)
       .replyWithError('Not found');
 
-    await expect(pageLoad(testingUrl, tempDir))
+    await expect(pageLoad(testUrl, tempDir))
       .rejects
       .toThrow('Not found');
   });
