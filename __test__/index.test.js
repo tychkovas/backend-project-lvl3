@@ -86,6 +86,21 @@ const dataTestError = [
   ],
 ];
 
+const dataFsError = [
+  ['permission denied',
+    {
+      outputPath: '/',
+      error: 'EACCES: permission denied',
+    },
+  ],
+  ['non-existing directory',
+    {
+      outputPath: '/tmp/nonExisting',
+      error: 'ENOENT: no such file or directory',
+    },
+  ],
+];
+
 let expectedPage;
 let resultPage;
 let tempDir;
@@ -157,33 +172,17 @@ describe('error situations', () => {
       .rejects
       .toThrow('EEXIST: file already exists');
   });
-  test('permission denied', async () => {
-    const scope = nock(testOrigin)
-      .get(testPathName)
-      .twice()
-      .reply(200, expectedPage);
 
-    expectedAssets.forEach((item) => {
-      scope.get(item.link)
-        .twice()
-        .reply(200, item.file);
+  describe('fs', () => {
+    test.each(dataFsError)('fs: %s', async (_name, data) => {
+      nock(testOrigin)
+        .get(testPathName)
+        .reply(200, expectedPage);
+
+      await expect(pageLoad(testingUrl, data.outputPath))
+        .rejects
+        .toThrow(data.error);
     });
-
-    await expect(pageLoad(testingUrl, '/'))
-      .rejects
-      .toThrow('EACCES: permission denied');
-  });
-
-  test('non-existing directory', async () => {
-    nock('https://ru.hexlet.io')
-      .get('/courses')
-      .reply(200, expectedPage);
-
-    const nonExistingDir = join(tempDir, 'nonExisting');
-
-    await expect(pageLoad(testingUrl, nonExistingDir))
-      .rejects
-      .toThrow('ENOENT: no such file or directory');
   });
 
   describe('errors net', () => {
