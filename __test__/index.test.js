@@ -1,9 +1,6 @@
-/* eslint-disable max-len */
 /**
  * @jest-environment node
  */
-// import debug as debug1 from 'debug';
-// import jest from 'jest';
 import nock from 'nock';
 import fsp from 'fs/promises';
 import fs from 'fs';
@@ -12,21 +9,11 @@ import cheerio from 'cheerio';
 import { fileURLToPath } from 'url';
 import { join, dirname } from 'path';
 import pageLoad from '../src/index';
-// import { describe } from 'jest-circus';
-
-const debug = 'ON_';
-
-const clog = (...par) => {
-  if (debug === 'ON') console.log(...par);
-};
 
 const __filename = fileURLToPath(import.meta.url);
-clog('__filename:', __filename);
 const __dirname = dirname(__filename);
-clog('__dirname:', __dirname);
 
 const getFixturesPath = (filename) => join(__dirname, '..', '__fixtures__', filename);
-clog('getFixturesPath:', getFixturesPath('name.tmp'));
 
 const getFileSync = (path, encding = null) => fs.readFileSync(getFixturesPath(path), encding);
 const getFile = (path, encding = null) => fsp.readFile(getFixturesPath(path), encding);
@@ -62,7 +49,7 @@ const expectedAssets = [
   },
 ];
 
-const dataTestError = [
+const dataNetError = [
   ['Request failed with status code 404',
     {
       setUrl: testingUrl,
@@ -120,15 +107,11 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   tempDir = await fsp.mkdtemp(join(os.tmpdir(), 'page-loader-'));
-  // tempDir = '/tmp/page-loader';
-  // fs.mkdirSync('/tmp/page-loader');
-  clog('tempDir: ', tempDir);
   nock.cleanAll();
 });
 
 test('successful loading page', async () => {
   const scope = nock(testOrigin)
-    // .log(debug1)
     .get(testPathName)
     .reply(200, expectedPage);
 
@@ -144,7 +127,6 @@ test('successful loading page', async () => {
   const actualFile = await fsp.readFile(pathActualFile, 'UTF-8');
 
   const resultPageFormated = cheerio.load(resultPage).html();
-  // clog('rPFormated   :', resultPageFormated);
 
   expect(actualFile).toBe(resultPageFormated);
 
@@ -181,7 +163,7 @@ describe('error situations', () => {
   });
 
   describe('net', () => {
-    test.each(dataTestError)('net: %s', async (error, data) => {
+    test.each(dataNetError)('net: %s', async (error, data) => {
       const { origin, pathname } = new URL(data.setUrl);
       nock(origin)
         .get(pathname)
@@ -206,5 +188,4 @@ describe('error situations', () => {
 
 afterEach(async () => {
   await fsp.rm(tempDir, { recursive: true });
-  clog('tempDir: ', tempDir);
 });
