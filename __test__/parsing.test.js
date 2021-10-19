@@ -42,8 +42,8 @@ test('transform page', async () => {
   const url = 'https://ru.hexlet.io/courses';
   const pathSave = 'ru-hexlet-io-courses_files';
 
-  loadedOriginalPage = await fsp.readFile(getFixturesPath('received_page.html'), 'UTF-8');
-  expectedConvertedPage = await fsp.readFile(getFixturesPath('ru_hexlet_io_courses.html'), 'UTF-8');
+  loadedOriginalPage = await fsp.readFile(getFixturesPath('loaded_page.html'), 'UTF-8');
+  expectedConvertedPage = await fsp.readFile(getFixturesPath('expected_page.html'), 'UTF-8');
 
   const { html: receivedPage, assets } = getPageForSave(loadedOriginalPage, pathSave, url);
 

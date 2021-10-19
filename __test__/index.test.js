@@ -46,7 +46,7 @@ const expectedAssets = [
     pathActual: 'ru-hexlet-io-courses_files/ru-hexlet-io-assets-application.css',
   },
   {
-    pathFile: 'received_page.html',
+    pathFile: 'loaded_page.html',
     encding: 'UTF-8',
     link: '/courses',
     pathActual: 'ru-hexlet-io-courses_files/ru-hexlet-io-courses.html',
@@ -66,14 +66,14 @@ let resultPage;
 let tempDir;
 
 beforeAll(async () => {
-  expectedPage = await getFile('received_page.html', 'UTF-8');
+  expectedPage = await getFile('loaded_page.html', 'UTF-8');
 
   expectedAssets.forEach((item) => {
     const file = getFileSync(item.pathFile, item.encding);
     Object.assign(item, { file });
   });
 
-  resultPage = await getFile('ru_hexlet_io_courses.html', 'UTF-8');
+  resultPage = await getFile('expected_page.html', 'UTF-8');
 });
 
 beforeEach(async () => {
