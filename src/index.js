@@ -4,6 +4,7 @@ import axios from 'axios';
 import 'axios-debug-log';
 import debug from 'debug';
 import { promises as fsp } from 'fs';
+import Listr from 'listr';
 
 import getPageForSave from './parsing.js';
 
@@ -45,7 +46,6 @@ const pageLoad = (pageAddress, outputPath) => {
   log('load html:', pageAddress);
 
   return axios.get(pageAddress)
-    // .then((response) => );
     .then((response) => {
       const { html, assets: dataLinks } = getPageForSave(response.data, pathSave, pageAddress);
       log('save html:', pathSaveFile);
@@ -54,7 +54,16 @@ const pageLoad = (pageAddress, outputPath) => {
       const promiseWriteFile = fsp.writeFile(pathSaveFile, html, 'utf-8');
       return Promise.all([promiseWriteFile, promiseMkDir]).then(() => dataLinks);
     })
-    .then((dataLinks) => Promise.all(dataLinks.map((item) => loadFiles(item, outputPath))))
+    .then((dataLinks) => {
+      const load = (item) => (
+        {
+          title: item.href,
+          task: () => loadFiles(item, outputPath),
+        }
+      );
+
+      return new Listr(dataLinks.map(load), { concurrent: true }).run();
+    })
     .then(() => log('---- finish load %o ----', nameSpaceLog))
     .then(() => pathSaveFile);
 };
