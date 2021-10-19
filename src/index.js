@@ -66,7 +66,12 @@ const pageLoad = (pageAddress, outputPath) => {
       return new Listr(assets.map(getTask), { concurrent: true }).run();
     })
     .then(() => log('---- finish load %o ----', nameSpaceLog))
-    .then(() => pathSaveFile);
+    .then(() => pathSaveFile)
+    .catch((error) => {
+      log(`error: '${error.message}'`);
+      log('---- error load %o ----', nameSpaceLog);
+      throw error;
+    });
 };
 
 export default pageLoad;
