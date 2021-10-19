@@ -1,9 +1,6 @@
-/* eslint-disable max-len */
 /**
  * @jest-environment node
  */
-// import debug as debug1 from 'debug';
-// import jest from 'jest';
 import nock from 'nock';
 import fsp from 'fs/promises';
 import fs from 'fs';

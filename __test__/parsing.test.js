@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 /**
  * @jest-environment node
  */
@@ -6,7 +5,7 @@ import fsp from 'fs/promises';
 import { fileURLToPath } from 'url';
 import { join, dirname } from 'path';
 import cheerio from 'cheerio';
-import getPageForSave from '../src/parsing';
+import getPageLoadData from '../src/parsing';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -45,7 +44,7 @@ test('transform page', async () => {
   loadedOriginalPage = await fsp.readFile(getFixturesPath('loaded_page.html'), 'UTF-8');
   expectedConvertedPage = await fsp.readFile(getFixturesPath('expected_page.html'), 'UTF-8');
 
-  const { html: receivedPage, assets } = getPageForSave(loadedOriginalPage, pathSave, url);
+  const { html: receivedPage, assets } = getPageLoadData(loadedOriginalPage, pathSave, url);
 
   expectedAssets.forEach((item) => expect(assets).toContainEqual(item));
 

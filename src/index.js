@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import path, { join } from 'path';
 import axios from 'axios';
 import 'axios-debug-log';
@@ -6,7 +5,7 @@ import debug from 'debug';
 import { promises as fsp } from 'fs';
 import Listr from 'listr';
 
-import getPageForSave from './parsing.js';
+import getPageLoadData from './parsing.js';
 
 const nameSpaceLog = 'page-loader';
 
@@ -21,7 +20,7 @@ const getNameFile = (url, separator = '') => url.replace(/^\w*?:\/\//mi, '')
 
 const getNameDir = (nameFile) => path.parse(nameFile).name.concat('_files');
 
-const loadFiles = ({ href, path: pathSave }, _outputPath) => {
+const loadAndSaveFile = ({ href, path: pathSave }, _outputPath) => {
   log('  load file:', href);
   return axios({
     method: 'get',
@@ -39,7 +38,7 @@ const pageLoad = (pageAddress, outputPath) => {
   log('pageAddress: ', pageAddress);
   log('outputPath:  ', outputPath);
   const nameSaveFile = getNameFile(pageAddress, '_');
-  const pathSaveFile = path.join(outputPath, nameSaveFile); //
+  const pathSaveFile = path.join(outputPath, nameSaveFile);
   const pathSave = getNameDir(getNameFile(pageAddress, '-'));
   const pathSaveDir = join(outputPath, pathSave);
 
@@ -47,22 +46,24 @@ const pageLoad = (pageAddress, outputPath) => {
 
   return axios.get(pageAddress)
     .then((response) => {
-      const { html, assets: dataLinks } = getPageForSave(response.data, pathSave, pageAddress);
+      const { html, assets } = getPageLoadData(response.data, pathSave, pageAddress);
+
       log('save html:', pathSaveFile);
-      if (dataLinks.length !== 0)log('creating a folder:', nameSaveFile);
-      const promiseMkDir = (dataLinks.length === 0) ? null : fsp.mkdir(pathSaveDir);
+      if (assets.length !== 0)log('creating a folder:', nameSaveFile);
+      const promiseMkDir = (assets.length === 0) ? null : fsp.mkdir(pathSaveDir);
       const promiseWriteFile = fsp.writeFile(pathSaveFile, html, 'utf-8');
-      return Promise.all([promiseWriteFile, promiseMkDir]).then(() => dataLinks);
+
+      return Promise.all([promiseWriteFile, promiseMkDir]).then(() => assets);
     })
-    .then((dataLinks) => {
-      const load = (item) => (
+    .then((assets) => {
+      const getTask = (asset) => (
         {
-          title: item.href,
-          task: () => loadFiles(item, outputPath),
+          title: asset.href,
+          task: () => loadAndSaveFile(asset, outputPath),
         }
       );
 
-      return new Listr(dataLinks.map(load), { concurrent: true }).run();
+      return new Listr(assets.map(getTask), { concurrent: true }).run();
     })
     .then(() => log('---- finish load %o ----', nameSpaceLog))
     .then(() => pathSaveFile);
