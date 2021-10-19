@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 /**
  * @jest-environment node
  */
@@ -6,19 +5,14 @@ import fsp from 'fs/promises';
 import { fileURLToPath } from 'url';
 import { join, dirname } from 'path';
 import cheerio from 'cheerio';
-import getPageForSave from '../src/parsing';
+import getPageLoadData from '../src/parsing';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const getFixturesPath = (filename) => join(__dirname, '..', '__fixtures__', filename);
 
-let expectedPage;
-let resultPage;
-
-beforeAll(async () => {
-  expectedPage = await fsp.readFile(getFixturesPath('getted_page/received_page.html'), 'UTF-8');
-  resultPage = await fsp.readFile(getFixturesPath('result_page/ru_hexlet_io_courses.html'), 'UTF-8');
-});
+let loadedOriginalPage;
+let expectedConvertedPage;
 
 const expectedAssets = [
   {
@@ -47,11 +41,14 @@ test('transform page', async () => {
   const url = 'https://ru.hexlet.io/courses';
   const pathSave = 'ru-hexlet-io-courses_files';
 
-  const { html, assets } = getPageForSave(expectedPage, pathSave, url);
+  loadedOriginalPage = await fsp.readFile(getFixturesPath('loaded_page.html'), 'UTF-8');
+  expectedConvertedPage = await fsp.readFile(getFixturesPath('expected_page.html'), 'UTF-8');
+
+  const { html: receivedPage, assets } = getPageLoadData(loadedOriginalPage, pathSave, url);
 
   expectedAssets.forEach((item) => expect(assets).toContainEqual(item));
 
-  const resultPageFormated = cheerio.load(resultPage).html();
+  const expectedPage = cheerio.load(expectedConvertedPage).html();
 
-  expect(html).toBe(resultPageFormated);
+  expect(receivedPage).toBe(expectedPage);
 });
