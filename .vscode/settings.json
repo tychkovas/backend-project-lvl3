@@ -1,6 +1,0 @@
-{
-    "editor.tabSize": 2,
-    "jest.jestCommandLine": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
-    "jestrunner.jestCommand": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
-    "jest.autoRun": {"watch": false, "onSave": "test-file", "onStartup": ["all-tests"]},
-}
