@@ -107,30 +107,43 @@ beforeEach(async () => {
   nock.cleanAll();
 });
 
-test('successful loading page', async () => {
-  const scope = nock(testOrigin)
-    .get(testPathName)
-    .reply(200, expectedPage);
+describe('successful', () => {
+  test('loading page', async () => {
+    const scope = nock(testOrigin)
+      .get(testPathName)
+      .reply(200, expectedPage);
 
-  expectedAssets.forEach((item) => {
-    scope.get(item.link)
-      .reply(200, item.file);
+    expectedAssets.forEach((item) => {
+      scope.get(item.link)
+        .reply(200, item.file);
+    });
+
+    await expect(pageLoad(testUrl, tempDir))
+      .resolves.toEqual(join(tempDir, 'ru-hexlet-io-courses.html'));
+
+    const pathActualFile = join(tempDir, 'ru-hexlet-io-courses.html');
+    const actualFile = await fsp.readFile(pathActualFile, 'UTF-8');
+
+    const resultPageFormated = cheerio.load(resultPage).html();
+
+    expect(actualFile).toBe(resultPageFormated);
+
+    expectedAssets.forEach((item) => {
+      const pathActualAsset = join(tempDir, item.pathActual);
+      const actualAsset = fs.readFileSync(pathActualAsset, item.encding);
+      expect(actualAsset).toEqual(item.file);
+    });
   });
 
-  await expect(pageLoad(testUrl, tempDir))
-    .resolves.toEqual(join(tempDir, 'ru_hexlet_io_courses.html'));
+  test('download to current workdir', async () => {
+    nock(testOrigin)
+      .get(testPathName)
+      .reply(200, '<html>/</html>');
 
-  const pathActualFile = join(tempDir, 'ru_hexlet_io_courses.html');
-  const actualFile = await fsp.readFile(pathActualFile, 'UTF-8');
+    await expect(pageLoad(testUrl))
+      .resolves.toEqual(join('', 'ru-hexlet-io-courses.html'));
 
-  const resultPageFormated = cheerio.load(resultPage).html();
-
-  expect(actualFile).toBe(resultPageFormated);
-
-  expectedAssets.forEach((item) => {
-    const pathActualAsset = join(tempDir, item.pathActual);
-    const actualAsset = fs.readFileSync(pathActualAsset, item.encding);
-    expect(actualAsset).toEqual(item.file);
+    fs.rmSync(join('./', 'ru-hexlet-io-courses.html'));
   });
 });
 

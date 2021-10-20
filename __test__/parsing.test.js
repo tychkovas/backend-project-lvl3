@@ -37,7 +37,7 @@ const expectedAssets = [
   },
 ];
 
-test('transform page', async () => {
+test('parsing page', async () => {
   const url = 'https://ru.hexlet.io/courses';
   const pathSave = 'ru-hexlet-io-courses_files';
 
