@@ -14,10 +14,13 @@
 $ git clone https://github.com/tychkovas/backend-project-lvl3
 $ cd backend-project-lvl3
 $ make install
-$ sudo npm link
+$ npm link
+$ page-loader https://habr.com/ru/flows/develop
 ```
 
 ## Example 
+
+[![asciicast](https://asciinema.org/a/443383.svg)](https://asciinema.org/a/443383)
 #### demonstrates HTML file
 [![asciicast](https://asciinema.org/a/WC7tTEDGzMRXwZMgvcorfEWVU.svg)](https://asciinema.org/a/WC7tTEDGzMRXwZMgvcorfEWVU)
 
