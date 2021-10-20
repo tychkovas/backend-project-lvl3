@@ -37,7 +37,7 @@ const pageLoad = (pageAddress, outputPath) => {
   log('---- start load %o ----', nameSpaceLog);
   log('pageAddress: ', pageAddress);
   log('outputPath:  ', outputPath);
-  const nameSaveFile = getNameFile(pageAddress, '_');
+  const nameSaveFile = getNameFile(pageAddress, '-');
   const pathSaveFile = path.join(outputPath, nameSaveFile);
   const pathSave = getNameDir(getNameFile(pageAddress, '-'));
   const pathSaveDir = join(outputPath, pathSave);
