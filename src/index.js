@@ -33,15 +33,12 @@ const loadAndSaveFile = ({ href, path: pathSave }, _outputPath) => {
     });
 };
 
-const loadPage = (pageAddress, outputPath) => {
+const loadPage = (pageAddress, outputPath = '') => {
   log('---- start load %o ----', nameSpaceLog);
   log('pageAddress: ', pageAddress);
   log('outputPath:  ', outputPath);
   if (!pageAddress) {
     return Promise.reject(new Error(`site address not defined: ${pageAddress}`));
-  }
-  if (!outputPath) {
-    return Promise.reject(new Error(`output path not defined: ${outputPath}`));
   }
   const nameSaveFile = getNameFile(pageAddress, '-');
   const pathSaveFile = path.join(outputPath, nameSaveFile);
