@@ -134,6 +134,17 @@ test('successful loading page', async () => {
   });
 });
 
+test('successful: download to current workdir', async () => {
+  nock(testOrigin)
+    .get(testPathName)
+    .reply(200, '<html>/</html>');
+
+  await expect(pageLoad(testUrl))
+    .resolves.toEqual(join('', 'ru-hexlet-io-courses.html'));
+
+  fs.rmSync(join('./', 'ru-hexlet-io-courses.html'));
+});
+
 describe('error situations', () => {
   describe('fs', () => {
     test.each(dataFsError)('fs: %s', async (_name, data) => {
