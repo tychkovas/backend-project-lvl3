@@ -33,7 +33,7 @@ const loadAndSaveFile = ({ href, path: pathSave }, _outputPath) => {
     });
 };
 
-const pageLoad = (pageAddress, outputPath) => {
+const loadPage = (pageAddress, outputPath) => {
   log('---- start load %o ----', nameSpaceLog);
   log('pageAddress: ', pageAddress);
   log('outputPath:  ', outputPath);
@@ -74,4 +74,4 @@ const pageLoad = (pageAddress, outputPath) => {
     });
 };
 
-export default pageLoad;
+export default loadPage;
