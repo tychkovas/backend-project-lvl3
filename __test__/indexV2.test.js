@@ -8,7 +8,7 @@ import os from 'os';
 import cheerio from 'cheerio';
 import { fileURLToPath } from 'url';
 import { join, dirname } from 'path';
-import pageLoad from '../src/index';
+import loadPage from '../src/index';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -65,7 +65,7 @@ const dataNetError = [
   ],
   ['Nock: No match for request',
     {
-      setUrl: 'https://ru.hexlet.io/',
+      setUrl: `${testUrl}/`,
       replyArg: [200],
     },
   ],
@@ -118,17 +118,17 @@ test('successful loading page', async () => {
       .reply(200, item.file);
   });
 
-  const result = await expect(pageLoad(testUrl, tempDir));
-  console.log('result: ', result);
-  // await expect(pageLoad(testUrl, tempDir))
-  //   .resolves.toEqual(join(tempDir, 'site-com-blog-about.html'));
+  // const result = await expect(loadPage(testUrl, tempDir));
+  // console.log('result: ', result);
+  await expect(loadPage(testUrl, tempDir))
+    .resolves.toEqual(join(tempDir, 'site-com-blog-about.html'));
 
   const pathActualFile = join(tempDir, 'site-com-blog-about.html');
   const actualFile = await fsp.readFile(pathActualFile, 'UTF-8');
 
-  const resultPageFormated = cheerio.load(resultPage).html();
+  const resultPageFormated = cheerio.load(resultPage.trim()).html();
 
-  expect(actualFile).toBe(resultPageFormated);
+  expect(actualFile.trim()).toBe(resultPageFormated.trim());
 
   expectedAssets.forEach((item) => {
     const pathActualAsset = join(tempDir, item.pathActual);
@@ -137,14 +137,14 @@ test('successful loading page', async () => {
   });
 });
 
-describe.skip('error situations', () => {
+describe('error situations', () => {
   describe('fs', () => {
     test.each(dataFsError)('fs: %s', async (_name, data) => {
       nock(testOrigin)
         .get(testPathName)
         .reply(200, expectedPage);
 
-      await expect(pageLoad(testUrl, data.outputPath))
+      await expect(loadPage(testUrl, data.outputPath))
         .rejects
         .toThrow(data.error);
     });
@@ -157,7 +157,7 @@ describe.skip('error situations', () => {
       .get(testPathName)
       .reply(200, expectedPage);
 
-    await expect(pageLoad(testUrl, tempDir))
+    await expect(loadPage(testUrl, tempDir))
       .rejects
       .toThrow('EEXIST: file already exists');
   });
@@ -170,7 +170,7 @@ describe.skip('error situations', () => {
         .get(pathname)
         .reply(...data.replyArg);
 
-      await expect(pageLoad(testUrl, tempDir))
+      await expect(loadPage(testUrl, tempDir))
         .rejects
         .toThrow(error);
     });
@@ -181,7 +181,7 @@ describe.skip('error situations', () => {
       .get(testPathName)
       .replyWithError('Not found');
 
-    await expect(pageLoad(testUrl, tempDir))
+    await expect(loadPage(testUrl, tempDir))
       .rejects
       .toThrow('Not found');
   });
