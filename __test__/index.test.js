@@ -197,6 +197,12 @@ describe('error situations', () => {
   });
 });
 
+test('call without arguments', async () => {
+  await expect(pageLoad())
+    .rejects
+    .toThrow('site address not defined:');
+});
+
 afterEach(async () => {
   await fsp.rm(tempDir, { recursive: true });
 });
