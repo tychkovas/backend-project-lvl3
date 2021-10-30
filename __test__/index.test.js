@@ -3,49 +3,49 @@
  */
 import nock from 'nock';
 import fsp from 'fs/promises';
-import fs from 'fs';
 import os from 'os';
-import cheerio from 'cheerio';
+import prettier from 'prettier';
 import { fileURLToPath } from 'url';
-import { join, dirname } from 'path';
+import path from 'path';
 import pageLoad from '../src/index';
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const __dirname = path.dirname(__filename);
 
-const getFixturesPath = (filename) => join(__dirname, '..', '__fixtures__', filename);
+const getFixturesPath = (filename) => path.join(__dirname, '..', '__fixtures__', filename);
 
-const getFileSync = (path, encding = null) => fs.readFileSync(getFixturesPath(path), encding);
-const getFile = (path, encding = null) => fsp.readFile(getFixturesPath(path), encding);
+const getFile = (pathFile, encding = null) => fsp.readFile(getFixturesPath(pathFile), encding);
 
 const testUrl = 'https://ru.hexlet.io/courses';
 const testOrigin = 'https://ru.hexlet.io/';
 const testPathName = '/courses';
+const nameDirAssets = 'ru-hexlet-io-courses_files';
+const nameLoadedPage = 'ru-hexlet-io-courses.html';
 
 const expectedAssets = [
   {
     pathFile: 'assets/nodejs.png',
     encding: null,
     link: '/assets/professions/nodejs.png',
-    pathActual: 'ru-hexlet-io-courses_files/ru-hexlet-io-assets-professions-nodejs.png',
+    pathActual: path.join(nameDirAssets, 'ru-hexlet-io-assets-professions-nodejs.png'),
   },
   {
     pathFile: 'assets/application.css',
     encding: null,
     link: '/assets/application.css',
-    pathActual: 'ru-hexlet-io-courses_files/ru-hexlet-io-assets-application.css',
+    pathActual: path.join(nameDirAssets, 'ru-hexlet-io-assets-application.css'),
   },
   {
     pathFile: 'loaded_page.html',
     encding: 'UTF-8',
     link: '/courses',
-    pathActual: 'ru-hexlet-io-courses_files/ru-hexlet-io-courses.html',
+    pathActual: path.join(nameDirAssets, nameLoadedPage),
   },
   {
     pathFile: 'assets/runtime.js',
     encding: null,
     link: '/packs/js/runtime.js',
-    pathActual: 'ru-hexlet-io-courses_files/ru-hexlet-io-packs-js-runtime.js',
+    pathActual: path.join(nameDirAssets, 'ru-hexlet-io-packs-js-runtime.js'),
   },
 ];
 
@@ -91,49 +91,71 @@ let tempDir;
 
 nock.disableNetConnect();
 
+const formatFile = (file) => prettier.format(file, {
+  parser: 'html',
+  htmlWhitespaceSensitivity: 'ignore',
+});
+
 beforeAll(async () => {
   expectedPage = await getFile('loaded_page.html', 'UTF-8');
 
-  expectedAssets.forEach((item) => {
-    const file = getFileSync(item.pathFile, item.encding);
-    Object.assign(item, { file });
-  });
+  await Promise.all(expectedAssets.map((item) => getFile(item.pathFile, item.encding)
+    .then((file) => Object.assign(item, { file }))));
 
   resultPage = await getFile('expected_page.html', 'UTF-8');
 });
 
-beforeEach(async () => {
-  tempDir = await fsp.mkdtemp(join(os.tmpdir(), 'page-loader-'));
-  nock.cleanAll();
-});
-
 describe('successful', () => {
-  test('loading page', async () => {
-    const scope = nock(testOrigin)
-      .get(testPathName)
-      .reply(200, expectedPage);
+  describe('load page', () => {
+    beforeAll(async () => {
+      tempDir = await fsp.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
+      nock.cleanAll();
 
-    expectedAssets.forEach((item) => {
-      scope.get(item.link)
-        .reply(200, item.file);
+      const scope = nock(testOrigin)
+        .get(testPathName)
+        .reply(200, expectedPage);
+
+      expectedAssets.forEach((item) => {
+        scope.get(item.link)
+          .reply(200, item.file);
+      });
+    });
+    test('html', async () => {
+      await expect(pageLoad(testUrl, tempDir))
+        .resolves.toEqual(path.join(tempDir, nameLoadedPage));
+
+      const pathActualFile = path.join(tempDir, nameLoadedPage);
+      const actualFile = await fsp.readFile(pathActualFile, 'UTF-8');
+
+      expect(formatFile(actualFile)).toBe(formatFile(resultPage));
     });
 
-    await expect(pageLoad(testUrl, tempDir))
-      .resolves.toEqual(join(tempDir, 'ru-hexlet-io-courses.html'));
+    test.each(expectedAssets.map((assets) => [assets.pathFile, assets]))('load %s', async (_, item) => {
+      const pathActualAsset = path.join(tempDir, item.pathActual);
+      const actualAsset = await fsp.readFile(pathActualAsset, item.encding);
 
-    const pathActualFile = join(tempDir, 'ru-hexlet-io-courses.html');
-    const actualFile = await fsp.readFile(pathActualFile, 'UTF-8');
-
-    const resultPageFormated = cheerio.load(resultPage).html();
-
-    expect(actualFile).toBe(resultPageFormated);
-
-    expectedAssets.forEach((item) => {
-      const pathActualAsset = join(tempDir, item.pathActual);
-      const actualAsset = fs.readFileSync(pathActualAsset, item.encding);
       expect(actualAsset).toEqual(item.file);
     });
   });
+
+  test('failed to download resource', async () => {
+    tempDir = await fsp.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
+    console.log('tempDir: ', tempDir);
+    nock.cleanAll();
+
+    nock(testOrigin)
+      .get(testPathName)
+      .reply(200, expectedPage);
+
+    await expect(pageLoad(testUrl, tempDir))
+      .resolves.toEqual(path.resolve(tempDir, nameLoadedPage));
+
+    await expect(fsp.readdir(path.resolve(tempDir, nameDirAssets)))
+      .resolves
+      .toEqual([]);
+  });
+
+  const pathLoadedPageInWorkdir = path.resolve(process.cwd(), nameLoadedPage);
 
   test('download to current workdir', async () => {
     nock(testOrigin)
@@ -141,13 +163,21 @@ describe('successful', () => {
       .reply(200, '<html>/</html>');
 
     await expect(pageLoad(testUrl))
-      .resolves.toEqual(join('', 'ru-hexlet-io-courses.html'));
+      .resolves.toEqual(pathLoadedPageInWorkdir);
+  });
 
-    fs.rmSync(join('./', 'ru-hexlet-io-courses.html'));
+  afterAll(async () => {
+    await fsp.rm(pathLoadedPageInWorkdir);
+    await fsp.rmdir(path.resolve(process.cwd(), nameDirAssets));
   });
 });
 
 describe('error situations', () => {
+  beforeEach(async () => {
+    tempDir = await fsp.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
+    nock.cleanAll();
+  });
+
   describe('fs', () => {
     test.each(dataFsError)('fs: %s', async (_name, data) => {
       nock(testOrigin)
@@ -158,18 +188,6 @@ describe('error situations', () => {
         .rejects
         .toThrow(data.error);
     });
-  });
-
-  test('fs: file already exists', async () => {
-    fs.mkdirSync(join(tempDir, 'ru-hexlet-io-courses_files'));
-
-    nock(testOrigin)
-      .get(testPathName)
-      .reply(200, expectedPage);
-
-    await expect(pageLoad(testUrl, tempDir))
-      .rejects
-      .toThrow('EEXIST: file already exists');
   });
 
   describe('net', () => {
@@ -201,8 +219,4 @@ test('call without arguments', async () => {
   await expect(pageLoad())
     .rejects
     .toThrow('site address not defined:');
-});
-
-afterEach(async () => {
-  await fsp.rm(tempDir, { recursive: true });
 });

@@ -1,4 +1,4 @@
-import path, { join } from 'path';
+import path from 'path';
 import axios from 'axios';
 import 'axios-debug-log';
 import debug from 'debug';
@@ -29,11 +29,14 @@ const loadAndSaveFile = ({ href, path: pathSave }, _outputPath) => {
   })
     .then((response) => {
       log('  save file:', href, 'as:', pathSave);
-      return fsp.writeFile(path.join(_outputPath, pathSave), response.data);
-    });
+      return fsp.writeFile(path.resolve(_outputPath, pathSave), response.data);
+    }, ((error) => {
+      log('  fail load:', href);
+      throw error;
+    }));
 };
 
-const loadPage = (pageAddress, outputPath = '') => {
+const loadPage = (pageAddress, outputPath = process.cwd()) => {
   log('---- start load %o ----', nameSpaceLog);
   log('pageAddress: ', pageAddress);
   log('outputPath:  ', outputPath);
@@ -41,24 +44,25 @@ const loadPage = (pageAddress, outputPath = '') => {
     return Promise.reject(new Error(`site address not defined: ${pageAddress}`));
   }
   const nameSaveFile = getNameFile(pageAddress, '-');
-  const pathSaveFile = path.join(outputPath, nameSaveFile);
+  const pathSaveFile = path.resolve(outputPath, nameSaveFile);
   const pathSave = getNameDir(getNameFile(pageAddress, '-'));
-  const pathSaveDir = join(outputPath, pathSave);
+  const pathSaveDir = path.resolve(outputPath, pathSave);
+  let pageData;
 
   log('load html:', pageAddress);
-
   return axios.get(pageAddress)
     .then((response) => {
-      const { html, assets } = getPageLoadData(response.data, pathSave, pageAddress);
-
-      log('save html:', pathSaveFile);
-      if (assets.length !== 0)log('creating a folder:', nameSaveFile);
-      const promiseMkDir = (assets.length === 0) ? null : fsp.mkdir(pathSaveDir);
-      const promiseWriteFile = fsp.writeFile(pathSaveFile, html, 'utf-8');
-
-      return Promise.all([promiseWriteFile, promiseMkDir]).then(() => assets);
+      pageData = getPageLoadData(response.data, pathSave, pageAddress);
     })
-    .then((assets) => {
+    .then(() => fsp.access(pathSaveDir).catch(() => {
+      log('creating a folder:', nameSaveFile);
+      return fsp.mkdir(pathSaveDir);
+    }))
+    .then(() => {
+      log('save html:', pathSaveFile);
+      return fsp.writeFile(pathSaveFile, pageData.html, 'utf-8');
+    })
+    .then(() => {
       const getTask = (asset) => (
         {
           title: asset.href,
@@ -66,7 +70,9 @@ const loadPage = (pageAddress, outputPath = '') => {
         }
       );
 
-      return new Listr(assets.map(getTask), { concurrent: true }).run();
+      return new Listr(pageData.assets.map(getTask), { concurrent: true, exitOnError: false })
+        .run()
+        .catch(() => log('failed to load some assets'));
     })
     .then(() => log('---- finish load %o ----', nameSpaceLog))
     .then(() => pathSaveFile)
