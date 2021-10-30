@@ -15,11 +15,7 @@ const __dirname = path.dirname(__filename);
 
 const getFixturesPath = (filename) => path.join(__dirname, '..', '__fixtures__', filename);
 
-const getFileSync = (pathFile, encding = null) => fs
-  .readFileSync(getFixturesPath(pathFile), encding);
-
-const getFile = (pathFile, encding = null) => fsp
-  .readFile(getFixturesPath(pathFile), encding);
+const getFile = (pathFile, encding = null) => fsp.readFile(getFixturesPath(pathFile), encding);
 
 const testUrl = 'https://ru.hexlet.io/courses';
 const testOrigin = 'https://ru.hexlet.io/';
@@ -98,10 +94,8 @@ nock.disableNetConnect();
 beforeAll(async () => {
   expectedPage = await getFile('loaded_page.html', 'UTF-8');
 
-  expectedAssets.forEach((item) => {
-    const file = getFileSync(item.pathFile, item.encding);
-    Object.assign(item, { file });
-  });
+  await Promise.all(expectedAssets.map((item) => getFile(item.pathFile, item.encding)
+    .then((file) => Object.assign(item, { file }))));
 
   resultPage = await getFile('expected_page.html', 'UTF-8');
 });
