@@ -5,7 +5,7 @@ import nock from 'nock';
 import fsp from 'fs/promises';
 import fs from 'fs';
 import os from 'os';
-import cheerio from 'cheerio';
+import prettier from 'prettier';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import pageLoad from '../src/index';
@@ -91,6 +91,11 @@ let tempDir;
 
 nock.disableNetConnect();
 
+const formatFile = (file) => prettier.format(file, {
+  parser: 'html',
+  htmlWhitespaceSensitivity: 'ignore',
+});
+
 beforeAll(async () => {
   expectedPage = await getFile('loaded_page.html', 'UTF-8');
 
@@ -122,9 +127,7 @@ describe('successful', () => {
     const pathActualFile = path.join(tempDir, 'ru-hexlet-io-courses.html');
     const actualFile = await fsp.readFile(pathActualFile, 'UTF-8');
 
-    const resultPageFormated = cheerio.load(resultPage).html();
-
-    expect(actualFile).toBe(resultPageFormated);
+    expect(formatFile(actualFile)).toBe(formatFile(resultPage));
 
     expectedAssets.forEach((item) => {
       const pathActualAsset = path.join(tempDir, item.pathActual);

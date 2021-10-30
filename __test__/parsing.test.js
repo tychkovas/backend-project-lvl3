@@ -4,7 +4,6 @@
 import fsp from 'fs/promises';
 import { fileURLToPath } from 'url';
 import path from 'path';
-import cheerio from 'cheerio';
 import getPageLoadData from '../src/parsing';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -44,7 +43,5 @@ test('parsing page', async () => {
 
   expectedAssets.forEach((item) => expect(assets).toContainEqual(item));
 
-  const expectedPage = cheerio.load(expectedConvertedPage).html();
-
-  expect(receivedPage).toBe(expectedPage);
+  expect(receivedPage).toBe(expectedConvertedPage);
 });
