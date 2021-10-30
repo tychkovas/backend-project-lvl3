@@ -7,45 +7,49 @@ import fs from 'fs';
 import os from 'os';
 import cheerio from 'cheerio';
 import { fileURLToPath } from 'url';
-import { join, dirname } from 'path';
+import path from 'path';
 import pageLoad from '../src/index';
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const __dirname = path.dirname(__filename);
 
-const getFixturesPath = (filename) => join(__dirname, '..', '__fixtures__', filename);
+const getFixturesPath = (filename) => path.join(__dirname, '..', '__fixtures__', filename);
 
-const getFileSync = (path, encding = null) => fs.readFileSync(getFixturesPath(path), encding);
-const getFile = (path, encding = null) => fsp.readFile(getFixturesPath(path), encding);
+const getFileSync = (pathFile, encding = null) => fs
+  .readFileSync(getFixturesPath(pathFile), encding);
+
+const getFile = (pathFile, encding = null) => fsp
+  .readFile(getFixturesPath(pathFile), encding);
 
 const testUrl = 'https://ru.hexlet.io/courses';
 const testOrigin = 'https://ru.hexlet.io/';
 const testPathName = '/courses';
+const nameDirAssets = 'ru-hexlet-io-courses_files';
 
 const expectedAssets = [
   {
     pathFile: 'assets/nodejs.png',
     encding: null,
     link: '/assets/professions/nodejs.png',
-    pathActual: 'ru-hexlet-io-courses_files/ru-hexlet-io-assets-professions-nodejs.png',
+    pathActual: path.join(nameDirAssets, 'ru-hexlet-io-assets-professions-nodejs.png'),
   },
   {
     pathFile: 'assets/application.css',
     encding: null,
     link: '/assets/application.css',
-    pathActual: 'ru-hexlet-io-courses_files/ru-hexlet-io-assets-application.css',
+    pathActual: path.join(nameDirAssets, 'ru-hexlet-io-assets-application.css'),
   },
   {
     pathFile: 'loaded_page.html',
     encding: 'UTF-8',
     link: '/courses',
-    pathActual: 'ru-hexlet-io-courses_files/ru-hexlet-io-courses.html',
+    pathActual: path.join(nameDirAssets, 'ru-hexlet-io-courses.html'),
   },
   {
     pathFile: 'assets/runtime.js',
     encding: null,
     link: '/packs/js/runtime.js',
-    pathActual: 'ru-hexlet-io-courses_files/ru-hexlet-io-packs-js-runtime.js',
+    pathActual: path.join(nameDirAssets, 'ru-hexlet-io-packs-js-runtime.js'),
   },
 ];
 
@@ -103,7 +107,7 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
-  tempDir = await fsp.mkdtemp(join(os.tmpdir(), 'page-loader-'));
+  tempDir = await fsp.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
   nock.cleanAll();
 });
 
@@ -119,9 +123,9 @@ describe('successful', () => {
     });
 
     await expect(pageLoad(testUrl, tempDir))
-      .resolves.toEqual(join(tempDir, 'ru-hexlet-io-courses.html'));
+      .resolves.toEqual(path.join(tempDir, 'ru-hexlet-io-courses.html'));
 
-    const pathActualFile = join(tempDir, 'ru-hexlet-io-courses.html');
+    const pathActualFile = path.join(tempDir, 'ru-hexlet-io-courses.html');
     const actualFile = await fsp.readFile(pathActualFile, 'UTF-8');
 
     const resultPageFormated = cheerio.load(resultPage).html();
@@ -129,7 +133,7 @@ describe('successful', () => {
     expect(actualFile).toBe(resultPageFormated);
 
     expectedAssets.forEach((item) => {
-      const pathActualAsset = join(tempDir, item.pathActual);
+      const pathActualAsset = path.join(tempDir, item.pathActual);
       const actualAsset = fs.readFileSync(pathActualAsset, item.encding);
       expect(actualAsset).toEqual(item.file);
     });
@@ -141,9 +145,9 @@ describe('successful', () => {
       .reply(200, '<html>/</html>');
 
     await expect(pageLoad(testUrl))
-      .resolves.toEqual(join('', 'ru-hexlet-io-courses.html'));
+      .resolves.toEqual(path.join('', 'ru-hexlet-io-courses.html'));
 
-    fs.rmSync(join('./', 'ru-hexlet-io-courses.html'));
+    fs.rmSync(path.join('./', 'ru-hexlet-io-courses.html'));
   });
 });
 
@@ -161,7 +165,7 @@ describe('error situations', () => {
   });
 
   test('fs: file already exists', async () => {
-    fs.mkdirSync(join(tempDir, 'ru-hexlet-io-courses_files'));
+    fs.mkdirSync(path.join(tempDir, nameDirAssets));
 
     nock(testOrigin)
       .get(testPathName)
