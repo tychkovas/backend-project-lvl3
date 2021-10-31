@@ -135,15 +135,19 @@ describe('successful', () => {
     expect(actualAsset).toEqual(item.file);
   });
 
+  const pathLoadedPageInWorkdir = path.join('./', 'ru-hexlet-io-courses.html');
+
   test('download to current workdir', async () => {
     nock(testOrigin)
       .get(testPathName)
       .reply(200, '<html>/</html>');
 
     await expect(pageLoad(testUrl))
-      .resolves.toEqual(path.join('', 'ru-hexlet-io-courses.html'));
+      .resolves.toEqual(path.join(pathLoadedPageInWorkdir));
+  });
 
-    fs.rmSync(path.join('./', 'ru-hexlet-io-courses.html'));
+  afterAll(async () => {
+    await fsp.rm(pathLoadedPageInWorkdir);
   });
 });
 
