@@ -1,4 +1,4 @@
-import path, { join } from 'path';
+import path from 'path';
 import axios from 'axios';
 import 'axios-debug-log';
 import debug from 'debug';
@@ -29,11 +29,11 @@ const loadAndSaveFile = ({ href, path: pathSave }, _outputPath) => {
   })
     .then((response) => {
       log('  save file:', href, 'as:', pathSave);
-      return fsp.writeFile(path.join(_outputPath, pathSave), response.data);
+      return fsp.writeFile(path.resolve(_outputPath, pathSave), response.data);
     });
 };
 
-const loadPage = (pageAddress, outputPath = '') => {
+const loadPage = (pageAddress, outputPath = process.cwd()) => {
   log('---- start load %o ----', nameSpaceLog);
   log('pageAddress: ', pageAddress);
   log('outputPath:  ', outputPath);
@@ -41,9 +41,9 @@ const loadPage = (pageAddress, outputPath = '') => {
     return Promise.reject(new Error(`site address not defined: ${pageAddress}`));
   }
   const nameSaveFile = getNameFile(pageAddress, '-');
-  const pathSaveFile = path.join(outputPath, nameSaveFile);
+  const pathSaveFile = path.resolve(outputPath, nameSaveFile);
   const pathSave = getNameDir(getNameFile(pageAddress, '-'));
-  const pathSaveDir = join(outputPath, pathSave);
+  const pathSaveDir = path.resolve(outputPath, pathSave);
 
   log('load html:', pageAddress);
 

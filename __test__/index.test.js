@@ -136,17 +136,19 @@ describe('successful', () => {
     expect(actualAsset).toEqual(item.file);
   });
 
+  const pathLoadedPageInWorkdir = path.resolve(process.cwd(), nameLoadedPage);
+
   test('download to current workdir', async () => {
     nock(testOrigin)
       .get(testPathName)
       .reply(200, '<html>/</html>');
 
     await expect(pageLoad(testUrl))
-      .resolves.toEqual(nameLoadedPage);
+      .resolves.toEqual(pathLoadedPageInWorkdir);
   });
 
   afterAll(async () => {
-    await fsp.rm(path.resolve(process.cwd(), nameLoadedPage));
+    await fsp.rm(pathLoadedPageInWorkdir);
   });
 });
 
