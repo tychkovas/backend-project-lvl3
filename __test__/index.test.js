@@ -21,6 +21,7 @@ const testUrl = 'https://ru.hexlet.io/courses';
 const testOrigin = 'https://ru.hexlet.io/';
 const testPathName = '/courses';
 const nameDirAssets = 'ru-hexlet-io-courses_files';
+const nameLoadedPage = 'ru-hexlet-io-courses.html';
 
 const expectedAssets = [
   {
@@ -39,7 +40,7 @@ const expectedAssets = [
     pathFile: 'loaded_page.html',
     encding: 'UTF-8',
     link: '/courses',
-    pathActual: path.join(nameDirAssets, 'ru-hexlet-io-courses.html'),
+    pathActual: path.join(nameDirAssets, nameLoadedPage),
   },
   {
     pathFile: 'assets/runtime.js',
@@ -120,9 +121,9 @@ describe('successful', () => {
     });
 
     await expect(pageLoad(testUrl, tempDir))
-      .resolves.toEqual(path.join(tempDir, 'ru-hexlet-io-courses.html'));
+      .resolves.toEqual(path.join(tempDir, nameLoadedPage));
 
-    const pathActualFile = path.join(tempDir, 'ru-hexlet-io-courses.html');
+    const pathActualFile = path.join(tempDir, nameLoadedPage);
     const actualFile = await fsp.readFile(pathActualFile, 'UTF-8');
 
     expect(formatFile(actualFile)).toBe(formatFile(resultPage));
@@ -135,19 +136,17 @@ describe('successful', () => {
     expect(actualAsset).toEqual(item.file);
   });
 
-  const pathLoadedPageInWorkdir = path.join('./', 'ru-hexlet-io-courses.html');
-
   test('download to current workdir', async () => {
     nock(testOrigin)
       .get(testPathName)
       .reply(200, '<html>/</html>');
 
     await expect(pageLoad(testUrl))
-      .resolves.toEqual(path.join(pathLoadedPageInWorkdir));
+      .resolves.toEqual(nameLoadedPage);
   });
 
   afterAll(async () => {
-    await fsp.rm(pathLoadedPageInWorkdir);
+    await fsp.rm(path.resolve(process.cwd(), nameLoadedPage));
   });
 });
 
@@ -210,8 +209,4 @@ test('call without arguments', async () => {
   await expect(pageLoad())
     .rejects
     .toThrow('site address not defined:');
-});
-
-afterEach(async () => {
-  // await fsp.rm(tempDir, { recursive: true });
 });
