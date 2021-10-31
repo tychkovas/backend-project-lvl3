@@ -96,22 +96,20 @@ const formatFile = (file) => prettier.format(file, {
   htmlWhitespaceSensitivity: 'ignore',
 });
 
-beforeAll(async () => {
-  expectedPage = await getFile('loaded_page.html', 'UTF-8');
-
-  await Promise.all(expectedAssets.map((item) => getFile(item.pathFile, item.encding)
-    .then((file) => Object.assign(item, { file }))));
-
-  resultPage = await getFile('expected_page.html', 'UTF-8');
-});
-
-beforeEach(async () => {
-  tempDir = await fsp.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
-  nock.cleanAll();
-});
-
 describe('successful', () => {
-  test('loading page', async () => {
+  beforeAll(async () => {
+    tempDir = await fsp.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
+    nock.cleanAll();
+
+    expectedPage = await getFile('loaded_page.html', 'UTF-8');
+
+    await Promise.all(expectedAssets.map((item) => getFile(item.pathFile, item.encding)
+      .then((file) => Object.assign(item, { file }))));
+
+    resultPage = await getFile('expected_page.html', 'UTF-8');
+  });
+
+  test('load html page', async () => {
     const scope = nock(testOrigin)
       .get(testPathName)
       .reply(200, expectedPage);
@@ -128,12 +126,13 @@ describe('successful', () => {
     const actualFile = await fsp.readFile(pathActualFile, 'UTF-8');
 
     expect(formatFile(actualFile)).toBe(formatFile(resultPage));
+  });
 
-    expectedAssets.forEach((item) => {
-      const pathActualAsset = path.join(tempDir, item.pathActual);
-      const actualAsset = fs.readFileSync(pathActualAsset, item.encding);
-      expect(actualAsset).toEqual(item.file);
-    });
+  test.each(expectedAssets.map((assets) => [assets.pathFile, assets]))('load %s', async (_, item) => {
+    const pathActualAsset = path.join(tempDir, item.pathActual);
+    const actualAsset = await fsp.readFile(pathActualAsset, item.encding);
+
+    expect(actualAsset).toEqual(item.file);
   });
 
   test('download to current workdir', async () => {
@@ -149,6 +148,11 @@ describe('successful', () => {
 });
 
 describe('error situations', () => {
+  beforeEach(async () => {
+    tempDir = await fsp.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
+    nock.cleanAll();
+  });
+
   describe('fs', () => {
     test.each(dataFsError)('fs: %s', async (_name, data) => {
       nock(testOrigin)
@@ -205,5 +209,5 @@ test('call without arguments', async () => {
 });
 
 afterEach(async () => {
-  await fsp.rm(tempDir, { recursive: true });
+  // await fsp.rm(tempDir, { recursive: true });
 });
