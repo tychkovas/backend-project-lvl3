@@ -30,7 +30,10 @@ const loadAndSaveFile = ({ href, path: pathSave }, _outputPath) => {
     .then((response) => {
       log('  save file:', href, 'as:', pathSave);
       return fsp.writeFile(path.resolve(_outputPath, pathSave), response.data);
-    });
+    }, ((error) => {
+      log('  fail load:', href);
+      throw error;
+    }));
 };
 
 const loadPage = (pageAddress, outputPath = process.cwd()) => {
@@ -68,7 +71,8 @@ const loadPage = (pageAddress, outputPath = process.cwd()) => {
       );
 
       return new Listr(pageData.assets.map(getTask), { concurrent: true, exitOnError: false })
-        .run();
+        .run()
+        .catch(() => log('failed to load some assets'));
     })
     .then(() => log('---- finish load %o ----', nameSpaceLog))
     .then(() => pathSaveFile)
