@@ -96,19 +96,20 @@ const formatFile = (file) => prettier.format(file, {
   htmlWhitespaceSensitivity: 'ignore',
 });
 
+beforeAll(async () => {
+  expectedPage = await getFile('loaded_page.html', 'UTF-8');
+
+  await Promise.all(expectedAssets.map((item) => getFile(item.pathFile, item.encding)
+    .then((file) => Object.assign(item, { file }))));
+
+  resultPage = await getFile('expected_page.html', 'UTF-8');
+});
+
 describe('successful', () => {
-  beforeAll(async () => {
-    tempDir = await fsp.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
-    nock.cleanAll();
-  });
   describe('load page', () => {
     beforeAll(async () => {
-      expectedPage = await getFile('loaded_page.html', 'UTF-8');
-
-      await Promise.all(expectedAssets.map((item) => getFile(item.pathFile, item.encding)
-        .then((file) => Object.assign(item, { file }))));
-
-      resultPage = await getFile('expected_page.html', 'UTF-8');
+      tempDir = await fsp.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
+      nock.cleanAll();
 
       const scope = nock(testOrigin)
         .get(testPathName)
@@ -135,6 +136,23 @@ describe('successful', () => {
 
       expect(actualAsset).toEqual(item.file);
     });
+  });
+
+  test('failed to download resource', async () => {
+    tempDir = await fsp.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
+    console.log('tempDir: ', tempDir);
+    nock.cleanAll();
+
+    nock(testOrigin)
+      .get(testPathName)
+      .reply(200, expectedPage);
+
+    await expect(pageLoad(testUrl, tempDir))
+      .resolves.toEqual(path.resolve(tempDir, nameLoadedPage));
+
+    await expect(fsp.readdir(path.resolve(tempDir, nameDirAssets)))
+      .resolves
+      .toEqual([]);
   });
 
   const pathLoadedPageInWorkdir = path.resolve(process.cwd(), nameLoadedPage);
