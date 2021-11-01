@@ -44,21 +44,22 @@ const loadPage = (pageAddress, outputPath = process.cwd()) => {
   const pathSaveFile = path.resolve(outputPath, nameSaveFile);
   const pathSave = getNameDir(getNameFile(pageAddress, '-'));
   const pathSaveDir = path.resolve(outputPath, pathSave);
+  let pageData;
 
   log('load html:', pageAddress);
-
   return axios.get(pageAddress)
     .then((response) => {
-      const { html, assets } = getPageLoadData(response.data, pathSave, pageAddress);
-
-      log('save html:', pathSaveFile);
-      if (assets.length !== 0)log('creating a folder:', nameSaveFile);
-      const promiseMkDir = (assets.length === 0) ? null : fsp.mkdir(pathSaveDir);
-      const promiseWriteFile = fsp.writeFile(pathSaveFile, html, 'utf-8');
-
-      return Promise.all([promiseWriteFile, promiseMkDir]).then(() => assets);
+      pageData = getPageLoadData(response.data, pathSave, pageAddress);
     })
-    .then((assets) => {
+    .then(() => fsp.access(pathSaveDir).catch(() => {
+      log('creating a folder:', nameSaveFile);
+      return fsp.mkdir(pathSaveDir);
+    }))
+    .then(() => {
+      log('save html:', pathSaveFile);
+      return fsp.writeFile(pathSaveFile, pageData.html, 'utf-8');
+    })
+    .then(() => {
       const getTask = (asset) => (
         {
           title: asset.href,
@@ -66,7 +67,8 @@ const loadPage = (pageAddress, outputPath = process.cwd()) => {
         }
       );
 
-      return new Listr(assets.map(getTask), { concurrent: true }).run();
+      return new Listr(pageData.assets.map(getTask), { concurrent: true, exitOnError: false })
+        .run();
     })
     .then(() => log('---- finish load %o ----', nameSpaceLog))
     .then(() => pathSaveFile)
