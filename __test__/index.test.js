@@ -100,39 +100,41 @@ describe('successful', () => {
   beforeAll(async () => {
     tempDir = await fsp.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
     nock.cleanAll();
-
-    expectedPage = await getFile('loaded_page.html', 'UTF-8');
-
-    await Promise.all(expectedAssets.map((item) => getFile(item.pathFile, item.encding)
-      .then((file) => Object.assign(item, { file }))));
-
-    resultPage = await getFile('expected_page.html', 'UTF-8');
   });
+  describe('load page', () => {
+    beforeAll(async () => {
+      expectedPage = await getFile('loaded_page.html', 'UTF-8');
 
-  test('load html page', async () => {
-    const scope = nock(testOrigin)
-      .get(testPathName)
-      .reply(200, expectedPage);
+      await Promise.all(expectedAssets.map((item) => getFile(item.pathFile, item.encding)
+        .then((file) => Object.assign(item, { file }))));
 
-    expectedAssets.forEach((item) => {
-      scope.get(item.link)
-        .reply(200, item.file);
+      resultPage = await getFile('expected_page.html', 'UTF-8');
+
+      const scope = nock(testOrigin)
+        .get(testPathName)
+        .reply(200, expectedPage);
+
+      expectedAssets.forEach((item) => {
+        scope.get(item.link)
+          .reply(200, item.file);
+      });
+    });
+    test('html', async () => {
+      await expect(pageLoad(testUrl, tempDir))
+        .resolves.toEqual(path.join(tempDir, nameLoadedPage));
+
+      const pathActualFile = path.join(tempDir, nameLoadedPage);
+      const actualFile = await fsp.readFile(pathActualFile, 'UTF-8');
+
+      expect(formatFile(actualFile)).toBe(formatFile(resultPage));
     });
 
-    await expect(pageLoad(testUrl, tempDir))
-      .resolves.toEqual(path.join(tempDir, nameLoadedPage));
+    test.each(expectedAssets.map((assets) => [assets.pathFile, assets]))('load %s', async (_, item) => {
+      const pathActualAsset = path.join(tempDir, item.pathActual);
+      const actualAsset = await fsp.readFile(pathActualAsset, item.encding);
 
-    const pathActualFile = path.join(tempDir, nameLoadedPage);
-    const actualFile = await fsp.readFile(pathActualFile, 'UTF-8');
-
-    expect(formatFile(actualFile)).toBe(formatFile(resultPage));
-  });
-
-  test.each(expectedAssets.map((assets) => [assets.pathFile, assets]))('load %s', async (_, item) => {
-    const pathActualAsset = path.join(tempDir, item.pathActual);
-    const actualAsset = await fsp.readFile(pathActualAsset, item.encding);
-
-    expect(actualAsset).toEqual(item.file);
+      expect(actualAsset).toEqual(item.file);
+    });
   });
 
   const pathLoadedPageInWorkdir = path.resolve(process.cwd(), nameLoadedPage);
