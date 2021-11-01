@@ -3,7 +3,6 @@
  */
 import nock from 'nock';
 import fsp from 'fs/promises';
-import fs from 'fs';
 import os from 'os';
 import prettier from 'prettier';
 import { fileURLToPath } from 'url';
@@ -168,18 +167,6 @@ describe('error situations', () => {
         .rejects
         .toThrow(data.error);
     });
-  });
-
-  test('fs: file already exists', async () => {
-    fs.mkdirSync(path.join(tempDir, nameDirAssets));
-
-    nock(testOrigin)
-      .get(testPathName)
-      .reply(200, expectedPage);
-
-    await expect(pageLoad(testUrl, tempDir))
-      .rejects
-      .toThrow('EEXIST: file already exists');
   });
 
   describe('net', () => {
