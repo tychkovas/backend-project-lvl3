@@ -148,6 +148,7 @@ describe('successful', () => {
 
   afterAll(async () => {
     await fsp.rm(pathLoadedPageInWorkdir);
+    await fsp.rmdir(path.resolve(process.cwd(), nameDirAssets));
   });
 });
 
