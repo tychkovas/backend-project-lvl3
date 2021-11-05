@@ -39,18 +39,18 @@ const loadPage = (pageAddress, outputPath = process.cwd()) => {
   }
   const nameSaveFile = getNameFile(pageAddress, '-');
   const pathSaveFile = path.resolve(outputPath, nameSaveFile);
-  const pathSave = getNameDir(pageAddress);
-  const pathSaveDir = path.resolve(outputPath, pathSave);
+  const nameAssetsDir = getNameDir(pageAddress);
+  const pathAssetsDir = path.resolve(outputPath, nameAssetsDir);
   let pageData;
 
   log('load html:', pageAddress);
   return axios.get(pageAddress)
     .then((response) => {
-      pageData = getPageLoadData(response.data, pathSave, pageAddress);
+      pageData = getPageLoadData(response.data, nameAssetsDir, pageAddress);
     })
-    .then(() => fsp.access(pathSaveDir).catch(() => {
+    .then(() => fsp.access(pathAssetsDir).catch(() => {
       log('creating a folder:', nameSaveFile);
-      return fsp.mkdir(pathSaveDir);
+      return fsp.mkdir(pathAssetsDir);
     }))
     .then(() => {
       log('save html:', pathSaveFile);
