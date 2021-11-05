@@ -6,19 +6,13 @@ import { promises as fsp } from 'fs';
 import Listr from 'listr';
 
 import getPageLoadData from './parsing.js';
+import { getNameFile, getNameDir } from './utils.js';
 
 const nameSpaceLog = 'page-loader';
 
 const log = debug(nameSpaceLog);
 
 debug('booting %o', nameSpaceLog);
-
-const getNameFile = (url) => url.replace(/^\w*?:\/\//mi, '')
-  .replace(/\/$/, '')
-  .replace(/\W/mig, '-')
-  .concat('.html');
-
-const getNameDir = (url) => path.parse(getNameFile(url)).name.concat('_files');
 
 const loadAndSaveFile = ({ href, path: pathSave }, _outputPath) => {
   log('  load file:', href);
