@@ -13,12 +13,12 @@ const log = debug(nameSpaceLog);
 
 debug('booting %o', nameSpaceLog);
 
-const getNameFile = (url, separator = '') => url.replace(/^\w*?:\/\//mi, '')
+const getNameFile = (url) => url.replace(/^\w*?:\/\//mi, '')
   .replace(/\/$/, '')
-  .replace(/\W/mig, separator)
+  .replace(/\W/mig, '-')
   .concat('.html');
 
-const getNameDir = (nameFile) => path.parse(nameFile).name.concat('_files');
+const getNameDir = (url) => path.parse(getNameFile(url)).name.concat('_files');
 
 const loadAndSaveFile = ({ href, path: pathSave }, _outputPath) => {
   log('  load file:', href);
@@ -45,7 +45,7 @@ const loadPage = (pageAddress, outputPath = process.cwd()) => {
   }
   const nameSaveFile = getNameFile(pageAddress, '-');
   const pathSaveFile = path.resolve(outputPath, nameSaveFile);
-  const pathSave = getNameDir(getNameFile(pageAddress, '-'));
+  const pathSave = getNameDir(pageAddress);
   const pathSaveDir = path.resolve(outputPath, pathSave);
   let pageData;
 
