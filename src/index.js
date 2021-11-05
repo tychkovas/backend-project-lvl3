@@ -6,19 +6,13 @@ import { promises as fsp } from 'fs';
 import Listr from 'listr';
 
 import getPageLoadData from './parsing.js';
+import { getNameFile, getNameDir } from './utils.js';
 
 const nameSpaceLog = 'page-loader';
 
 const log = debug(nameSpaceLog);
 
 debug('booting %o', nameSpaceLog);
-
-const getNameFile = (url, separator = '') => url.replace(/^\w*?:\/\//mi, '')
-  .replace(/\/$/, '')
-  .replace(/\W/mig, separator)
-  .concat('.html');
-
-const getNameDir = (nameFile) => path.parse(nameFile).name.concat('_files');
 
 const loadAndSaveFile = ({ href, path: pathSave }, _outputPath) => {
   log('  load file:', href);
@@ -45,18 +39,18 @@ const loadPage = (pageAddress, outputPath = process.cwd()) => {
   }
   const nameSaveFile = getNameFile(pageAddress, '-');
   const pathSaveFile = path.resolve(outputPath, nameSaveFile);
-  const pathSave = getNameDir(getNameFile(pageAddress, '-'));
-  const pathSaveDir = path.resolve(outputPath, pathSave);
+  const nameAssetsDir = getNameDir(pageAddress);
+  const pathAssetsDir = path.resolve(outputPath, nameAssetsDir);
   let pageData;
 
   log('load html:', pageAddress);
   return axios.get(pageAddress)
     .then((response) => {
-      pageData = getPageLoadData(response.data, pathSave, pageAddress);
+      pageData = getPageLoadData(response.data, nameAssetsDir, pageAddress);
     })
-    .then(() => fsp.access(pathSaveDir).catch(() => {
+    .then(() => fsp.access(pathAssetsDir).catch(() => {
       log('creating a folder:', nameSaveFile);
-      return fsp.mkdir(pathSaveDir);
+      return fsp.mkdir(pathAssetsDir);
     }))
     .then(() => {
       log('save html:', pathSaveFile);

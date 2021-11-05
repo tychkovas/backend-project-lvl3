@@ -96,6 +96,17 @@ const formatFile = (file) => prettier.format(file, {
   htmlWhitespaceSensitivity: 'ignore',
 });
 
+const ignoreError = (error) => `ignore error:${error.message}`;
+
+const cleanWokrDir = async (fileName, dirName) => {
+  await fsp.rm(path.resolve(process.cwd(), fileName)).catch(ignoreError);
+  await fsp.rmdir(path.resolve(process.cwd(), dirName)).catch(ignoreError);
+};
+
+beforeEach(async () => {
+  cleanWokrDir(nameLoadedPage, nameDirAssets);
+});
+
 beforeAll(async () => {
   expectedPage = await getFile('loaded_page.html', 'UTF-8');
 
@@ -155,20 +166,15 @@ describe('successful', () => {
       .toEqual([]);
   });
 
-  const pathLoadedPageInWorkdir = path.resolve(process.cwd(), nameLoadedPage);
-
   test('download to current workdir', async () => {
     nock(testOrigin)
       .get(testPathName)
       .reply(200, '<html>/</html>');
 
     await expect(pageLoad(testUrl))
-      .resolves.toEqual(pathLoadedPageInWorkdir);
-  });
+      .resolves.toEqual(path.resolve(process.cwd(), nameLoadedPage));
 
-  afterAll(async () => {
-    await fsp.rm(pathLoadedPageInWorkdir);
-    await fsp.rmdir(path.resolve(process.cwd(), nameDirAssets));
+    cleanWokrDir(nameLoadedPage, nameDirAssets);
   });
 });
 
