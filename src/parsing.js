@@ -1,7 +1,9 @@
 import cheerio from 'cheerio';
 import path from 'path';
 
-const getNameLoadFile = (prefix, link) => `${prefix}${link.replace(/\//mig, '-')}`;
+const getNameLoadFile = (prefix, pathname) => prefix
+  .concat(pathname.replace(/\//mig, '-'))
+  .concat(((path.extname(pathname) === '') ? '.html' : ''));
 
 const typeAssets = [
   { selector: 'link', attr: 'href' },
@@ -26,8 +28,7 @@ const getPageLoadData = (data, pathSave, url) => {
 
       if (curHost !== hostname) return;
 
-      const linkAdd = (path.extname(pathname) === '') ? pathname.concat('.html') : pathname;
-      const newPath = path.join(pathSave, getNameLoadFile(prefixFile, linkAdd));
+      const newPath = path.join(pathSave, getNameLoadFile(prefixFile, pathname));
 
       assets.push({ href, path: newPath });
 
